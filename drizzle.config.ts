@@ -1,8 +1,13 @@
+"use server";
 import type { Config } from "drizzle-kit";
+import "@/envConfig";
+
+if (!("DATABASE_URL" in process.env))
+  throw new Error("DATABASE_URL not found on .env.* file");
 
 export default {
   out: "./drizzle",
-  schema: "./app/server/db/schema.ts",
+  schema: "./src/server/db/schema.ts",
   breakpoints: true,
   dialect: "postgresql",
   dbCredentials: {

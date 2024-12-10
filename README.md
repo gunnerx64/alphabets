@@ -1,14 +1,38 @@
-# TanStarter
+# PingPanda - A Modern Fullstack Event Monitoring SaaS
 
-A minimal starter template for 🏝️ TanStack Start.
+Built with the Next.js App Router, Postgres, TypeScript, Tailwind & Clerk
 
-- TanStack [Start](https://tanstack.com/start/latest) + [Router](https://tanstack.com/router/latest) + [Query](https://tanstack.com/query/latest)
-- [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
-- [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL
-- Auth based on [Lucia](https://lucia-auth.com/)
+![Project Image](https://github.com/joschan21/pingpanda/blob/main/public/thumbnail.png)
 
-Auth providers:
+## Features
 
-- [x] GitHub
-- [x] Google
-- [x] Discord
+- 🛠️ Complete SaaS built in modern Next.js
+- 💻 Beautiful landing page included
+- 🎨 Custom artworks made by a professional illustrator
+- ✉️ Real-time event messages via Discord
+- 🖥️ Clean & intuitive event monitoring dashboard
+- 💳 Secure payments using Stripe
+- 🛍️ Customers can purchase your PRO plan
+- 🌟 Clean, modern UI on top of shadcn-ui
+- 🔑 Authentication using Clerk
+- ⌨️ 100% written in TypeScript
+- 🎁 ...much more
+
+## Getting started
+
+To get started with this project, run
+
+```bash
+  git clone https://github.com/joschan21/pingpanda.git
+```
+
+and copy the .env.example variables into a separate .env file, fill them out & and that's all you need to get started!
+
+
+## Acknowledgements
+
+- [Clerk](https://link.joshtriedcoding.com/clerk) for making this project possible
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)

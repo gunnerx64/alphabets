@@ -1,7 +1,5 @@
 import react from "@eslint-react/eslint-plugin";
 import js from "@eslint/js";
-import pluginQuery from "@tanstack/eslint-plugin-query";
-import pluginRouter from "@tanstack/eslint-plugin-router";
 import eslintConfigPrettier from "eslint-config-prettier";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
@@ -10,7 +8,7 @@ import tseslint from "typescript-eslint";
 // TODO: clean up for better composability
 export default tseslint.config(
   {
-    ignores: ["dist", ".vinxi", ".wrangler", ".vercel", ".netlify", ".output", "build/"],
+    ignores: ["dist", ".vinxi", ".wrangler", ".vercel", ".output", "build/"],
   },
   {
     files: ["**/*.{ts,tsx}"],
@@ -18,8 +16,7 @@ export default tseslint.config(
       js.configs.recommended,
       ...tseslint.configs.recommended,
       eslintConfigPrettier,
-      ...pluginQuery.configs["flat/recommended"],
-      ...pluginRouter.configs["flat/recommended"],
+      "next/core-web-vitals",
     ],
   },
   {
@@ -51,6 +48,8 @@ export default tseslint.config(
     rules: {
       // You can override any rules here
       // "@eslint-react/prefer-read-only-props": "off",
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-img-element": "off",
     },
   },
 );
