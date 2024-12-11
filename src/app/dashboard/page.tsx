@@ -1,47 +1,49 @@
-import { DashboardPage } from "@/components/dashboard-page"
-import { db } from "@/db"
-import { currentUser } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
-import { DashboardPageContent } from "./dashboard-page-content"
-import { CreateEventCategoryModal } from "@/components/create-event-category-modal"
-import { Button } from "@/components/ui/button"
-import { PlusIcon } from "lucide-react"
-import { createCheckoutSession } from "@/lib/stripe"
-import { PaymentSuccessModal } from "@/components/payment-success-modal"
+import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { PlusIcon } from "lucide-react";
+import { DashboardPage } from "@/components/dashboard-page";
+import { auth } from "@/server/auth";
+import { DashboardPageContent } from "./dashboard-page-content";
+import { CreateEventCategoryModal } from "@/components/create-event-category-modal";
+import { Button } from "@/components/ui/button";
+import { createCheckoutSession } from "@/lib/stripe";
+import { PaymentSuccessModal } from "@/components/payment-success-modal";
+import { db, table } from "@/server/db";
 
 interface PageProps {
   searchParams: {
-    [key: string]: string | string[] | undefined
-  }
+    [key: string]: string | string[] | undefined;
+  };
 }
 
 const Page = async ({ searchParams }: PageProps) => {
-  const auth = await currentUser()
+  const session = await auth();
 
-  if (!auth) {
-    redirect("/sign-in")
+  if (!session?.user || !session.user.id) {
+    redirect("/signin");
   }
 
-  const user = await db.user.findUnique({
-    where: { externalId: auth.id },
-  })
+  const user = await db.query.user.findFirst({
+    columns: { id: true, name: true, role: true, active: true },
+    where: eq(table.user.externalId, session.user.id),
+  });
 
   if (!user) {
-    return redirect("/welcome")
+    return redirect("/welcome");
   }
 
-  const intent = searchParams.intent
+  const intent = searchParams.intent;
 
-  if (intent === "upgrade") {
-    const session = await createCheckoutSession({
-      userEmail: user.email,
-      userId: user.id,
-    })
+  // if (intent === "upgrade") {
+  //   const session = await createCheckoutSession({
+  //     userEmail: user.email,
+  //     userId: user.id,
+  //   })
 
-    if (session.url) redirect(session.url)
-  }
+  //   if (session.url) redirect(session.url)
+  // }
 
-  const success = searchParams.success
+  const success = searchParams.success;
 
   return (
     <>
@@ -51,7 +53,7 @@ const Page = async ({ searchParams }: PageProps) => {
         cta={
           <CreateEventCategoryModal>
             <Button className="w-full sm:w-fit">
-              <PlusIcon className="size-4 mr-2" />
+              <PlusIcon className="mr-2 size-4" />
               Add Category
             </Button>
           </CreateEventCategoryModal>
@@ -61,7 +63,7 @@ const Page = async ({ searchParams }: PageProps) => {
         <DashboardPageContent />
       </DashboardPage>
     </>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;

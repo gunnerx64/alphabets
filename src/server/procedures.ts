@@ -1,43 +1,49 @@
-import { db } from "@/db"
-import { j } from "./__internals/j"
-import { currentUser } from "@clerk/nextjs/server"
-import { HTTPException } from "hono/http-exception"
+import { HTTPException } from "hono/http-exception";
+import { eq } from "drizzle-orm";
+import { j } from "./__internals/j";
+import { auth } from "@/server/auth";
+import { db, table } from "@/server/db";
 
 const authMiddleware = j.middleware(async ({ c, next }) => {
-  const authHeader = c.req.header("Authorization")
+  // const authHeader = c.req.header("Authorization")
 
-  if (authHeader) {
-    const apiKey = authHeader.split(" ")[1] // bearer <API_KEY>
+  // if (authHeader) {
+  //   const apiKey = authHeader.split(" ")[1] // bearer <API_KEY>
 
-    const user = await db.user.findUnique({
-      where: { apiKey },
-    })
+  //   const user = await db.user.findUnique({
+  //     where: { apiKey },
+  //   })
 
-    if (user) return next({ user })
+  //   if (user) return next({ user })
+  // }
+
+  const session = await auth();
+
+  if (!session?.user || !session?.user.id) {
+    throw new HTTPException(401, { message: "Unauthorized" });
   }
 
-  const auth = await currentUser()
-
-  if (!auth) {
-    throw new HTTPException(401, { message: "Unauthorized" })
-  }
-
-  const user = await db.user.findUnique({
-    where: { externalId: auth.id },
-  })
+  const user = await db.query.user.findFirst({
+    columns: { id: true, name: true, role: true, active: true },
+    where: eq(table.user.externalId, session.user.id),
+  });
 
   if (!user) {
-    throw new HTTPException(401, { message: "Unauthorized" })
+    throw new HTTPException(401, { message: "Unauthorized" });
   }
 
-  return next({ user })
-})
+  if (!user.active) {
+    throw new HTTPException(422, { message: "Your account is not active" });
+  }
+
+  return next({ user });
+});
 
 /**
  * Public (unauthenticated) procedures
  *
  * This is the base piece you use to build new queries and mutations on your API.
  */
-export const baseProcedure = j.procedure
-export const publicProcedure = baseProcedure
-export const privateProcedure = publicProcedure.use(authMiddleware)
+export const baseProcedure = j.procedure;
+export const publicProcedure = baseProcedure;
+export const privateProcedure = publicProcedure.use(authMiddleware);

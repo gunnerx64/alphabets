@@ -1,6 +1,15 @@
 import NextAuth, { DefaultSession, Profile, NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
+import {
+  AUTH_CUSTOM_CODENAME,
+  AUTH_CUSTOM_ID,
+  AUTH_CUSTOM_SECRET,
+  AUTH_CUSTOM_TITLE,
+  AUTH_CUSTOM_URL,
+  AUTH_GOOGLE_ID,
+  AUTH_GOOGLE_SECRET,
+} from "@/config";
 
 interface ProfilePosition {
   position?: string | null;
@@ -32,17 +41,26 @@ declare module "next-auth/jwt" {
   interface JWT extends ProfilePosition, ProfileUnit, Profile {}
 }
 
-if (!process.env.CLIENT_ID) console.error("auth: env var CLIENT_ID must be set");
-if (!process.env.CLIENT_SECRET) console.error("auth: env var CLIENT_SECRET must be set");
-if (!process.env.OAUTH_SERVER_URL) console.error("auth: env var OAUTH_SERVER_URL must be set");
+if (!process.env.AUTH_CUSTOM_ID)
+  console.error("auth: env var AUTH_CUSTOM_ID must be set");
+if (!process.env.AUTH_CUSTOM_SECRET)
+  console.error("auth: env var AUTH_CUSTOM_SECRET must be set");
+if (!process.env.AUTH_CUSTOM_URL)
+  console.error("auth: env var AUTH_CUSTOM_URL must be set");
 
-const providers: any[] = [];
-const AUTH_CUSTOM_CODENAME = process.env.AUTH_CUSTOM_CODENAME;
-const AUTH_CUSTOM_TITLE = process.env.AUTH_CUSTOM_TITLE;
-const AUTH_CUSTOM_URL = process.env.AUTH_CUSTOM_URL;
-const AUTH_CUSTOM_ID = process.env.AUTH_CUSTOM_ID;
-const AUTH_CUSTOM_SECRET = process.env.AUTH_CUSTOM_SECRET;
-if (AUTH_CUSTOM_CODENAME && AUTH_CUSTOM_TITLE && AUTH_CUSTOM_URL && AUTH_CUSTOM_ID && AUTH_CUSTOM_SECRET)
+export const providers: any[] = [];
+// const AUTH_CUSTOM_CODENAME = process.env.AUTH_CUSTOM_CODENAME;
+// const AUTH_CUSTOM_TITLE = process.env.AUTH_CUSTOM_TITLE;
+// const AUTH_CUSTOM_URL = process.env.AUTH_CUSTOM_URL;
+// const AUTH_CUSTOM_ID = process.env.AUTH_CUSTOM_ID;
+// const AUTH_CUSTOM_SECRET = process.env.AUTH_CUSTOM_SECRET;
+if (
+  AUTH_CUSTOM_CODENAME &&
+  AUTH_CUSTOM_TITLE &&
+  AUTH_CUSTOM_URL &&
+  AUTH_CUSTOM_ID &&
+  AUTH_CUSTOM_SECRET
+)
   providers.push({
     id: AUTH_CUSTOM_CODENAME,
     name: AUTH_CUSTOM_TITLE,
@@ -101,7 +119,7 @@ if (AUTH_CUSTOM_CODENAME && AUTH_CUSTOM_TITLE && AUTH_CUSTOM_URL && AUTH_CUSTOM_
     },
   });
 
-if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET)
+if (AUTH_GOOGLE_ID && AUTH_GOOGLE_SECRET)
   providers.push(
     Google({
       authorization: {
@@ -116,7 +134,7 @@ if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET)
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers,
-  debug: true,
+  debug: false,
   // для работы через прокси
   trustHost: true,
   session: { strategy: "jwt" },
@@ -127,7 +145,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
     signIn: async ({ account, profile }) => {
       if (account?.provider === "google") {
-        if (!profile?.email_verified) console.warn(`Эл.почта ${profile?.email} не подтверждена. Запрет.`);
+        if (!profile?.email_verified)
+          console.warn(`Эл.почта ${profile?.email} не подтверждена. Запрет.`);
         return !!profile?.email_verified;
       }
       return true; // Do different verification for other providers that don't have `email_verified`
