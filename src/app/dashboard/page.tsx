@@ -4,7 +4,7 @@ import { PlusIcon } from "lucide-react";
 import { DashboardPage } from "@/components/dashboard-page";
 import { auth } from "@/server/auth";
 import { DashboardPageContent } from "./dashboard-page-content";
-import { CreateEventCategoryModal } from "@/components/create-event-category-modal";
+import { CreateCardModal } from "@/components/create-card-modal";
 import { Button } from "@/components/ui/button";
 import { createCheckoutSession } from "@/lib/stripe";
 import { PaymentSuccessModal } from "@/components/payment-success-modal";
@@ -51,14 +51,14 @@ const Page = async ({ searchParams }: PageProps) => {
 
       <DashboardPage
         cta={
-          <CreateEventCategoryModal>
+          <CreateCardModal>
             <Button className="w-full sm:w-fit">
               <PlusIcon className="mr-2 size-4" />
-              Add Category
+              Добавить алфавитку
             </Button>
-          </CreateEventCategoryModal>
+          </CreateCardModal>
         }
-        title="Dashboard"
+        title="Алфавитки"
       >
         <DashboardPageContent />
       </DashboardPage>

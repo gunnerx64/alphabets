@@ -39,6 +39,19 @@ const authMiddleware = j.middleware(async ({ c, next }) => {
   return next({ user });
 });
 
+const userMiddleware = j.middleware(async ({ c, next, ctx }) => {
+  // if (ctx.user) return next({ user })
+  // }
+
+  console.log("called user context, ctx=", ctx);
+
+  // if (!user.active) {
+  //   throw new HTTPException(422, { message: "Your account is not active" });
+  // }
+
+  return next({});
+});
+
 /**
  * Public (unauthenticated) procedures
  *
@@ -47,3 +60,4 @@ const authMiddleware = j.middleware(async ({ c, next }) => {
 export const baseProcedure = j.procedure;
 export const publicProcedure = baseProcedure;
 export const privateProcedure = publicProcedure.use(authMiddleware);
+export const userProcedure = privateProcedure.use(userMiddleware);

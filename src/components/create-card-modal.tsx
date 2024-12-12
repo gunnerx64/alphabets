@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { PropsWithChildren, useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { CATEGORY_NAME_VALIDATOR } from "@/lib/validators/category-validator"
-import { Modal } from "./ui/modal"
-import { Label } from "./ui/label"
-import { Input } from "./ui/input"
-import { cn } from "@/utils"
-import { Button } from "./ui/button"
-import { client } from "@/lib/client"
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PropsWithChildren, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { CATEGORY_NAME_VALIDATOR } from "@/lib/validators/category-validator";
+import { Modal } from "./ui/modal";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { cn } from "@/utils";
+import { Button } from "./ui/button";
+import { client } from "@/lib/client";
 
 const EVENT_CATEGORY_VALIDATOR = z.object({
   name: CATEGORY_NAME_VALIDATOR,
@@ -20,9 +20,9 @@ const EVENT_CATEGORY_VALIDATOR = z.object({
     .min(1, "Color is required")
     .regex(/^#[0-9A-F]{6}$/i, "Invalid color format."),
   emoji: z.string().emoji("Invalid emoji").optional(),
-})
+});
 
-type EventCategoryForm = z.infer<typeof EVENT_CATEGORY_VALIDATOR>
+type EventCategoryForm = z.infer<typeof EVENT_CATEGORY_VALIDATOR>;
 
 const COLOR_OPTIONS = [
   "#FF6B6B", // bg-[#FF6B6B] ring-[#FF6B6B] Bright Red
@@ -35,7 +35,7 @@ const COLOR_OPTIONS = [
   "#FF85A2", // bg-[#FF85A2] ring-[#FF85A2] Pink
   "#2ECC71", // bg-[#2ECC71] ring-[#2ECC71] Emerald Green
   "#E17055", // bg-[#E17055] ring-[#E17055] Terracotta
-]
+];
 
 const EMOJI_OPTIONS = [
   { emoji: "💰", label: "Money (Sale)" },
@@ -48,28 +48,28 @@ const EMOJI_OPTIONS = [
   { emoji: "🏆", label: "Achievement" },
   { emoji: "💡", label: "Idea" },
   { emoji: "🔔", label: "Notification" },
-]
+];
 
 interface CreateEventCategoryModel extends PropsWithChildren {
-  containerClassName?: string
+  containerClassName?: string;
 }
 
-export const CreateEventCategoryModal = ({
+export const CreateCardModal = ({
   children,
   containerClassName,
 }: CreateEventCategoryModel) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const queryClient = useQueryClient()
+  const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { mutate: createEventCategory, isPending } = useMutation({
     mutationFn: async (data: EventCategoryForm) => {
-      await client.category.createEventCategory.$post(data)
+      await client.category.createEventCategory.$post(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-event-categories"] })
-      setIsOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["user-event-categories"] });
+      setIsOpen(false);
     },
-  })
+  });
 
   const {
     register,
@@ -79,14 +79,14 @@ export const CreateEventCategoryModal = ({
     formState: { errors },
   } = useForm<EventCategoryForm>({
     resolver: zodResolver(EVENT_CATEGORY_VALIDATOR),
-  })
+  });
 
-  const color = watch("color")
-  const selectedEmoji = watch("emoji")
+  const color = watch("color");
+  const selectedEmoji = watch("emoji");
 
   const onSubmit = (data: EventCategoryForm) => {
-    createEventCategory(data)
-  }
+    createEventCategory(data);
+  };
 
   return (
     <>
@@ -137,8 +137,8 @@ export const CreateEventCategoryModal = ({
                       `bg-[${premadeColor}]`,
                       "size-10 rounded-full ring-2 ring-offset-2 transition-all",
                       color === premadeColor
-                        ? "ring-brand-700 scale-110"
-                        : "ring-transparent hover:scale-105"
+                        ? "scale-110 ring-brand-700"
+                        : "ring-transparent hover:scale-105",
                     )}
                     onClick={() => setValue("color", premadeColor)}
                   ></button>
@@ -160,10 +160,10 @@ export const CreateEventCategoryModal = ({
                     key={emoji}
                     type="button"
                     className={cn(
-                      "size-10 flex items-center justify-center text-xl rounded-md transition-all",
+                      "flex size-10 items-center justify-center rounded-md text-xl transition-all",
                       selectedEmoji === emoji
-                        ? "bg-brand-100 ring-2 ring-brand-700 scale-110"
-                        : "bg-brand-100 hover:bg-brand-200"
+                        ? "scale-110 bg-brand-100 ring-2 ring-brand-700"
+                        : "bg-brand-100 hover:bg-brand-200",
                     )}
                     onClick={() => setValue("emoji", emoji)}
                   >
@@ -180,7 +180,7 @@ export const CreateEventCategoryModal = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end space-x-3 border-t pt-4">
             <Button
               type="button"
               variant="outline"
@@ -195,5 +195,5 @@ export const CreateEventCategoryModal = ({
         </form>
       </Modal>
     </>
-  )
-}
+  );
+};

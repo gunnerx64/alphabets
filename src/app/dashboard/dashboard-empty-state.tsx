@@ -1,56 +1,34 @@
-import { CreateEventCategoryModal } from "@/components/create-event-category-modal"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { client } from "@/lib/client"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { CreateCardModal } from "@/components/create-card-modal";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export const DashboardEmptyState = () => {
-  const queryClient = useQueryClient()
-
-  const { mutate: insertQuickstartCategories, isPending } = useMutation({
-    mutationFn: async () => {
-      await client.category.insertQuickstartCategories.$post()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-event-categories"] })
-    },
-  })
-
   return (
-    <Card className="flex flex-col items-center justify-center rounded-2xl flex-1 text-center p-6">
-      <div className="flex justify-center w-full">
+    <Card className="flex flex-1 flex-col items-center justify-center rounded-2xl p-6 text-center">
+      <div className="flex w-full justify-center">
         <img
           src="/brand-asset-wave.png"
           alt="No categories"
-          className="size-48 -mt-24"
+          className="-mt-24 size-48"
         />
       </div>
 
       <h1 className="mt-2 text-xl/8 font-medium tracking-tight text-gray-900">
-        No Event Categories Yet
+        В системе нет алфавиток
       </h1>
 
-      <p className="text-sm/6 text-gray-600 max-w-prose mt-2 mb-8">
-        Start tracking events by creating your first category.
+      <p className="mb-8 mt-2 max-w-prose text-sm/6 text-gray-600">
+        Для начала работы необходимо добавить в базу данных оцифрованные
+        алфавитки.
       </p>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-        <Button
-          variant="outline"
-          className="flex items-center space-x-2 w-full sm:w-auto"
-          onClick={() => insertQuickstartCategories()}
-          disabled={isPending}
-        >
-          <span className="size-5">🚀</span>
-          <span>{isPending ? "Creating..." : "Quickstart"}</span>
-        </Button>
-
-        <CreateEventCategoryModal containerClassName="w-full sm:w-auto">
-          <Button className="flex items-center space-x-2 w-full sm:w-auto">
-            <span>Add Category</span>
+      <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+        <CreateCardModal containerClassName="w-full sm:w-auto">
+          <Button className="flex w-full items-center space-x-2 sm:w-auto">
+            <span>Добавить алфавитку</span>
           </Button>
-        </CreateEventCategoryModal>
+        </CreateCardModal>
       </div>
     </Card>
-  )
-}
+  );
+};

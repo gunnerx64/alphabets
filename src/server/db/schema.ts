@@ -17,14 +17,14 @@ export const userRole = pgEnum("role", Roles);
 
 export const user = pgTable("user", {
   id: uuid().defaultRandom().primaryKey(),
-  externalId: text("external_id").unique(),
+  externalId: text("external_id").notNull().unique(),
   name: text().notNull(),
   fullName: text("full_name"),
   picture: text(),
   email: text().unique().notNull(),
-  active: boolean().default(true).notNull(),
-  role: userRole().default("guest").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  active: boolean().notNull().default(true),
+  role: userRole().notNull().default("guest"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .$onUpdate(() => new Date()),
@@ -92,7 +92,7 @@ export const card = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     createdByUserId: uuid("created_by_user_id").references(() => user.id),
     updatedAt: timestamp("updated_at")
-      .defaultNow()
+      .default(sql`NULL`)
       .$onUpdate(() => new Date()),
     updatedByUserId: uuid("updated_by_user_id").references(() => user.id),
   },
@@ -121,9 +121,10 @@ export const cardRelations = relations(card, ({ one }) => ({
 }));
 
 export type User = typeof user.$inferSelect;
+export type UserInsert = typeof user.$inferInsert;
 
 export type Region = Omit<typeof region.$inferSelect, "sort">;
 
-export type Card = typeof card.$inferSelect;
+export type CardSelect = typeof card.$inferSelect; //& { createdBy: User };
 
 export type CardInsert = typeof card.$inferInsert;

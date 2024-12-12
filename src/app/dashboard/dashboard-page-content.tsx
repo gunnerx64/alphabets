@@ -1,125 +1,132 @@
-"use client"
+"use client";
+import Link from "next/link";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format, formatDistanceToNow } from "date-fns";
+import { ArrowRight, BarChart2, Clock, Database, Trash2 } from "lucide-react";
 
-import { LoadingSpinner } from "@/components/loading-spinner"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Modal } from "@/components/ui/modal"
-import { client } from "@/lib/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { format, formatDistanceToNow } from "date-fns"
-import { ArrowRight, BarChart2, Clock, Database, Trash2 } from "lucide-react"
-import Link from "next/link"
-import { useState } from "react"
-import { DashboardEmptyState } from "./dashboard-empty-state"
+import { LoadingSpinner } from "@/components/loading-spinner";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { client } from "@/lib/client";
+import { DashboardEmptyState } from "./dashboard-empty-state";
 
 export const DashboardPageContent = () => {
-  const [deletingCategory, setDeletingCategory] = useState<string | null>(null)
-  const queryClient = useQueryClient()
+  const [deletingCard, setDeletingCard] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const { data: categories, isPending: isEventCategoriesLoading } = useQuery({
-    queryKey: ["user-event-categories"],
+  const { data: cards, isPending: isCardsLoading } = useQuery({
+    queryKey: ["get-cards"],
     queryFn: async () => {
-      const res = await client.category.getEventCategories.$get()
-      const { categories } = await res.json()
-      return categories
+      const res = await client.card.getCards.$get();
+      const cards = await res.json();
+      return cards;
     },
-  })
+  });
+  const { data: cardsTotal } = useQuery({
+    queryKey: ["get-cards-total"],
+    queryFn: async () => {
+      const res = await client.card.getCardsCount.$get();
+      const cardsTotal = await res.json();
+      return cardsTotal;
+    },
+  });
 
-  const { mutate: deleteCategory, isPending: isDeletingCategory } = useMutation(
-    {
-      mutationFn: async (name: string) => {
-        await client.category.deleteCategory.$post({ name })
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["user-event-categories"] })
-        setDeletingCategory(null)
-      },
-    }
-  )
+  const { mutate: deleteCard, isPending: isDeletingCard } = useMutation({
+    mutationFn: async (id: string) => {
+      await client.card.deleteCard.$post({ id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-cards"] });
+      queryClient.invalidateQueries({ queryKey: ["get-cards-total"] });
+      setDeletingCard(null);
+    },
+  });
 
-  if (isEventCategoriesLoading) {
+  if (isCardsLoading) {
     return (
-      <div className="flex items-center justify-center flex-1 h-full w-full">
+      <div className="flex h-full w-full flex-1 items-center justify-center">
         <LoadingSpinner />
       </div>
-    )
+    );
   }
 
-  if (!categories || categories.length === 0) {
-    return <DashboardEmptyState />
+  if (!cards || cards.length === 0) {
+    return <DashboardEmptyState />;
   }
 
   return (
     <>
-      <ul className="grid max-w-6xl grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {categories.map((category) => (
+      <ul className="grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        {cards.map((card) => (
           <li
-            key={category.id}
-            className="relative group z-10 transition-all duration-200 hover:-translate-y-0.5"
+            key={card.id}
+            className="group relative z-10 transition-all duration-200 hover:-translate-y-0.5"
           >
-            <div className="absolute z-0 inset-px rounded-lg bg-white" />
+            <div className="absolute inset-px z-0 rounded-lg bg-white" />
 
-            <div className="pointer-events-none z-0 absolute inset-px rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-md ring-1 ring-black/5" />
+            <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
 
-            <div className="relative p-6 z-10">
-              <div className="flex items-center gap-4 mb-6">
+            <div className="relative z-10 p-6">
+              <div className="mb-6 flex items-center gap-4">
                 <div
                   className="size-12 rounded-full"
                   style={{
-                    backgroundColor: category.color
-                      ? `#${category.color.toString(16).padStart(6, "0")}`
-                      : "#f3f4f6",
+                    backgroundColor: "#f3f4f6",
                   }}
                 />
 
                 <div>
                   <h3 className="text-lg/7 font-medium tracking-tight text-gray-950">
-                    {category.emoji || "📂"} {category.name}
+                    {"📂"} {card.lastname}
                   </h3>
                   <p className="text-sm/6 text-gray-600">
-                    {format(category.createdAt, "MMM d, yyyy")}
+                    {format(card.createdAt, "MMM d, yyyy")}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3 mb-6">
+              <div className="mb-6 space-y-3">
                 <div className="flex items-center text-sm/5 text-gray-600">
-                  <Clock className="size-4 mr-2 text-brand-500" />
+                  <Clock className="mr-2 size-4 text-brand-500" />
                   <span className="font-medium">Last ping:</span>
                   <span className="ml-1">
-                    {category.lastPing
-                      ? formatDistanceToNow(category.lastPing) + " ago"
-                      : "Never"}
+                    {formatDistanceToNow(card.createdAt) + " ago"}
                   </span>
                 </div>
                 <div className="flex items-center text-sm/5 text-gray-600">
-                  <Database className="size-4 mr-2 text-brand-500" />
-                  <span className="font-medium">Unique fields:</span>
-                  <span className="ml-1">{category.uniqueFieldCount || 0}</span>
+                  <Database className="mr-2 size-4 text-brand-500" />
+                  <span className="font-medium">Всего:</span>
+                  <span className="ml-1">{cardsTotal || 0}</span>
                 </div>
                 <div className="flex items-center text-sm/5 text-gray-600">
-                  <BarChart2 className="size-4 mr-2 text-brand-500" />
+                  <BarChart2 className="mr-2 size-4 text-brand-500" />
                   <span className="font-medium">Events this month:</span>
-                  <span className="ml-1">{category.eventsCount || 0}</span>
+                  <span className="ml-1">{0}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-4">
+              <div className="mt-4 flex items-center justify-between">
                 <Link
-                  href={`/dashboard/category/${category.name}`}
+                  href={`/dashboard/card/${card.id}`}
                   className={buttonVariants({
                     variant: "outline",
                     size: "sm",
                     className: "flex items-center gap-2 text-sm",
                   })}
                 >
-                  View all <ArrowRight className="size-4" />
+                  Просмотр <ArrowRight className="size-4" />
                 </Link>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-gray-500 hover:text-red-600 transition-colors"
-                  aria-label={`Delete ${category.name} category`}
-                  onClick={() => setDeletingCategory(category.name)}
+                  className="text-gray-500 transition-colors hover:text-red-600"
+                  aria-label={`Удалить карточку ${card.lastname}`}
+                  onClick={() =>
+                    setDeletingCard(
+                      `${card.lastname} ${card.firstname[0]}.${card.middlename?.at(0)}.`,
+                    )
+                  }
                 >
                   <Trash2 className="size-5" />
                 </Button>
@@ -130,37 +137,36 @@ export const DashboardPageContent = () => {
       </ul>
 
       <Modal
-        showModal={!!deletingCategory}
-        setShowModal={() => setDeletingCategory(null)}
+        showModal={!!deletingCard}
+        setShowModal={() => setDeletingCard(null)}
         className="max-w-md p-8"
       >
         <div className="space-y-6">
           <div>
             <h2 className="text-lg/7 font-medium tracking-tight text-gray-950">
-              Delete Category
+              Удаление карточки
             </h2>
             <p className="text-sm/6 text-gray-600">
-              Are you sure you want to delete the category "{deletingCategory}"?
-              This action cannot be undone.
+              Вы действительно хотите удалить карточку "{deletingCard}"?
+              <br />
+              Это действие не может быть отменено.
             </p>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => setDeletingCategory(null)}>
-              Cancel
+          <div className="flex justify-end space-x-3 border-t pt-4">
+            <Button variant="outline" onClick={() => setDeletingCard(null)}>
+              Отмена
             </Button>
             <Button
               variant="destructive"
-              onClick={() =>
-                deletingCategory && deleteCategory(deletingCategory)
-              }
-              disabled={isDeletingCategory}
+              onClick={() => deletingCard && deleteCard(deletingCard)}
+              disabled={isDeletingCard}
             >
-              {isDeletingCategory ? "Deleting..." : "Delete"}
+              {isDeletingCard ? "Удаление..." : "Удалить"}
             </Button>
           </div>
         </div>
       </Modal>
     </>
-  )
-}
+  );
+};

@@ -1,16 +1,15 @@
-"use client"
-
-import { ReactNode } from "react"
-import { Button } from "./ui/button"
-import { ArrowLeft } from "lucide-react"
-import { Heading } from "./heading"
-import { useRouter } from "next/navigation"
+"use client";
+import { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "./ui/button";
+import { Heading } from "./heading";
 
 interface DashboardPageProps {
-  title: string
-  children?: ReactNode
-  hideBackButton?: boolean
-  cta?: ReactNode
+  title: string;
+  children?: ReactNode;
+  hideBackButton?: boolean;
+  cta?: ReactNode;
 }
 
 export const DashboardPage = ({
@@ -19,12 +18,12 @@ export const DashboardPage = ({
   cta,
   hideBackButton,
 }: DashboardPageProps) => {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
-    <section className="flex-1 h-full w-full flex flex-col">
-      <div className="w-full p-6 sm:p-8 flex justify-between border-b border-gray-200">
-        <div className="w-full flex flex-col sm:flex-row items-start sm:items-center gap-6">
+    <section className="flex h-full w-full flex-1 flex-col">
+      <div className="flex w-full justify-between border-b border-gray-200 p-6 sm:p-8">
+        <div className="flex w-full flex-col items-start gap-6 sm:flex-row sm:items-center">
           <div className="flex items-center gap-8">
             {hideBackButton ? null : (
               <Button
@@ -43,9 +42,9 @@ export const DashboardPage = ({
         </div>
       </div>
 
-      <div className="flex-1 p-6 sm:p-8 flex flex-col overflow-y-auto">
+      <div className="flex flex-1 flex-col overflow-y-auto p-6 sm:p-8">
         {children}
       </div>
     </section>
-  )
-}
+  );
+};
