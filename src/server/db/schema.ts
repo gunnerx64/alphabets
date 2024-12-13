@@ -1,4 +1,4 @@
-import { SQL, relations, sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   integer,
   pgTable,
@@ -12,6 +12,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { Roles } from "@/types";
+// import { InferQueryModel } from ".";
 
 export const userRole = pgEnum("role", Roles);
 
@@ -19,7 +20,7 @@ export const user = pgTable("user", {
   id: uuid().defaultRandom().primaryKey(),
   externalId: text("external_id").notNull().unique(),
   name: text().notNull(),
-  fullName: text("full_name"),
+  fullName: text("full_name").notNull(),
   picture: text(),
   email: text().unique().notNull(),
   active: boolean().notNull().default(true),
@@ -28,8 +29,6 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .$onUpdate(() => new Date()),
-  setupAt: timestamp("setup_at"),
-  termsAcceptedAt: timestamp("terms_accepted_at"),
 });
 
 export const oauthAccount = pgTable(
@@ -125,6 +124,21 @@ export type UserInsert = typeof user.$inferInsert;
 
 export type Region = Omit<typeof region.$inferSelect, "sort">;
 
-export type CardSelect = typeof card.$inferSelect; //& { createdBy: User };
+export type Card = typeof card.$inferSelect; //& { createdBy: User };
+
+export type CardWithRefs = Card & { region?: Region } & {
+  createdBy: Pick<User, "id" | "fullName"> | null;
+} & {
+  updatedBy: Pick<User, "id" | "fullName"> | null;
+};
+
+// export type CardWithRefs = InferQueryModel<
+//   "card",
+//   {
+//     with: {
+//       region: true;
+//     };
+//   }
+// >;
 
 export type CardInsert = typeof card.$inferInsert;

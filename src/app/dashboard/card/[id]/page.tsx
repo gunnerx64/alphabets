@@ -35,8 +35,18 @@ const Page = async ({ params }: PageProps) => {
   const card = await db.query.card.findFirst({
     with: {
       region: true,
-      createdBy: true,
-      updatedBy: true,
+      createdBy: {
+        columns: {
+          id: true,
+          fullName: true,
+        },
+      },
+      updatedBy: {
+        columns: {
+          id: true,
+          fullName: true,
+        },
+      },
     },
     where: eq(table.card.id, id),
   });

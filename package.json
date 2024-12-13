@@ -10,8 +10,8 @@
     "deploy": "wrangler deploy",
     "ui": "pnpm dlx shadcn@latest",
     "drizzle": "drizzle-kit studio",
-    "drizzle:generate": "drizzle-kit generate:pg",
-    "drizzle:push": "drizzle-kit push:pg",
+    "drizzle:generate": "drizzle-kit generate",
+    "drizzle:push": "drizzle-kit push",
     "drizzle:seed": "npx tsx ./src/server/db/seed.ts"
   },
   "dependencies": {

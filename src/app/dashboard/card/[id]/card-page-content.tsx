@@ -14,7 +14,7 @@ import {
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { CardSelect } from "@/server/db/schema";
+import type { CardWithRefs } from "@/server/db/schema";
 import { Modal } from "@/components/ui/modal";
 
 interface DataElementProps {
@@ -32,7 +32,7 @@ const DataElement = ({ title, content: value, Icon }: DataElementProps) => (
 
 interface CardPageContentProps {
   //hasEvents: boolean;
-  card: CardSelect;
+  card: CardWithRefs;
 }
 export const CardPageContent = ({
   //hasEvents: initialHasEvents,
@@ -93,16 +93,18 @@ export const CardPageContent = ({
                 title="Оригинал"
                 content={"TODO: Превью фото скана"}
               />
-              <DataElement
-                Icon={Database}
-                title="Оцифровал"
-                content={`${card.createdBy.fullName} (${card.createdAt.toLocaleDateString("ru-ru")} г.)`}
-              />
-              {card.updatedAt && (
+              {card.createdBy && (
+                <DataElement
+                  Icon={Database}
+                  title="Оцифровал"
+                  content={`${card.createdBy.fullName} (${card.createdAt.toLocaleDateString("ru-ru")} г.)`}
+                />
+              )}
+              {card.updatedAt && card.updatedBy && (
                 <DataElement
                   Icon={Clock}
                   title="Редактировал"
-                  content={`${card.updatedByUserId} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
+                  content={`${card.updatedBy.fullName} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
                 />
               )}
             </div>
