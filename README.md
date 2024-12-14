@@ -1,36 +1,25 @@
-# PingPanda - A Modern Fullstack Event Monitoring SaaS
+# Alphabets - Проект для управления алфавитками
 
-Built with the Next.js App Router, Postgres, TypeScript, Tailwind & Clerk
+Разработан с использованием Next.js, React, Drizzle ORM, Postgres, TypeScript, TailwindCSS, Auth.js и shadcn-ui.
 
-![Project Image](https://github.com/joschan21/pingpanda/blob/main/public/thumbnail.png)
+![Project Image](https://github.com/gunnerx64/alphabets/blob/master/public/thumbnail.jpg)
 
 ## Features
 
-- 🛠️ Complete SaaS built in modern Next.js
 - 💻 Beautiful landing page included
-- 🎨 Custom artworks made by a professional illustrator
-- ✉️ Real-time event messages via Discord
-- 🖥️ Clean & intuitive event monitoring dashboard
-- 💳 Secure payments using Stripe
-- 🛍️ Customers can purchase your PRO plan
 - 🌟 Clean, modern UI on top of shadcn-ui
-- 🔑 Authentication using Clerk
+- 🔑 Authentication using Auth.js
 - ⌨️ 100% written in TypeScript
-- 🎁 ...much more
 
 ## Getting started
 
 To get started with this project, run
 
 ```bash
-  git clone https://github.com/joschan21/pingpanda.git
+  git clone https://github.com/gunnerx64/alphabets.git
 ```
 
 and copy the .env.example variables into a separate .env file, fill them out & and that's all you need to get started!
-
-## Acknowledgements
-
-- [Clerk](https://link.joshtriedcoding.com/clerk) for making this project possible
 
 ## Особенности
 
