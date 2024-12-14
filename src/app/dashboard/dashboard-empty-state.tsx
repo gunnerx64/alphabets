@@ -1,6 +1,6 @@
-import { CreateCardModal } from "@/components/create-card-modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 
 export const DashboardEmptyState = () => {
   return (
@@ -23,11 +23,11 @@ export const DashboardEmptyState = () => {
       </p>
 
       <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-        <CreateCardModal containerClassName="w-full sm:w-auto">
+        <Link href="/dashboard/card/create">
           <Button className="flex w-full items-center space-x-2 sm:w-auto">
             <span>Добавить алфавитку</span>
           </Button>
-        </CreateCardModal>
+        </Link>
       </div>
     </Card>
   );

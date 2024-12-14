@@ -1,47 +1,114 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { ArrowRight, BarChart2, Clock, Database, Trash2 } from "lucide-react";
-
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { client } from "@/lib/client";
 import { DashboardEmptyState } from "./dashboard-empty-state";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
 
-export const DashboardPageContent = () => {
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  Row,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { buildCardColumns } from "./columns";
+import { trpc } from "@/lib/trpc-client";
+
+interface DashboardPageContentProps {
+  isAdmin: boolean;
+  isGuest: boolean;
+}
+
+export const DashboardPageContent = (props: DashboardPageContentProps) => {
+  const { isAdmin, isGuest } = props;
+  const searchParams = useSearchParams();
+  // https://localhost:3000/dashboard/category/sale?page=5&limit=30
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const pageSize = parseInt(searchParams.get("pageSize") || "15", 10);
+  const [pagination, setPagination] = useState({
+    pageIndex: page - 1,
+    pageSize: pageSize,
+  });
+
   const [deletingCard, setDeletingCard] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: cards, isPending: isCardsLoading } = useQuery({
-    queryKey: ["get-cards"],
-    queryFn: async () => {
-      const res = await client.card.getCards.$get();
-      const cards = await res.json();
-      return cards;
-    },
-  });
-  const { data: cardsTotal } = useQuery({
-    queryKey: ["get-cards-total"],
-    queryFn: async () => {
-      const res = await client.card.getCardsCount.$get();
-      const cardsTotal = await res.json();
-      return cardsTotal;
+  const { data: cards, isPending: isCardsLoading } =
+    trpc.card.getCards.useQuery(
+      /*{
+      page: pagination.pageIndex,
+      pageSize: pagination.pageSize,
+    }*/ undefined,
+      {
+        refetchInterval: 5000,
+      },
+    );
+  console.log("cards = ", cards);
+  const { data: cardsTotal } = trpc.card.getCardsCount.useQuery();
+
+  const { mutate: deleteCard, isPending: isDeletingCard } =
+    trpc.card.deleteCard.useMutation();
+  const onSuccessCbk = () => {
+    queryClient.invalidateQueries({ queryKey: ["get-cards"] });
+    queryClient.invalidateQueries({ queryKey: ["get-cards-total"] });
+    setDeletingCard(null);
+  };
+
+  const columns = useMemo(
+    () => buildCardColumns(isAdmin, isGuest),
+    [isAdmin, isGuest],
+  );
+  const table = useReactTable({
+    data: cards || [],
+    columns: columns,
+    getCoreRowModel: getCoreRowModel(),
+    // onSortingChange: setSorting,
+    // getSortedRowModel: getSortedRowModel(),
+    // onColumnFiltersChange: setColumnFilters,
+    // getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.ceil((cardsTotal || 0) / pagination.pageSize),
+    onPaginationChange: setPagination,
+    debugTable: true,
+    autoResetPageIndex: false,
+    autoResetAll: false,
+    autoResetExpanded: false,
+    state: {
+      // sorting,
+      // columnFilters,
+      pagination,
     },
   });
 
-  const { mutate: deleteCard, isPending: isDeletingCard } = useMutation({
-    mutationFn: async (id: string) => {
-      await client.card.deleteCard.$post({ id });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["get-cards"] });
-      queryClient.invalidateQueries({ queryKey: ["get-cards-total"] });
-      setDeletingCard(null);
-    },
-  });
+  const router = useRouter();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("page", (pagination.pageIndex + 1).toString());
+    searchParams.set("pageSize", pagination.pageSize.toString());
+    router.push(`?${searchParams.toString()}`, { scroll: false });
+  }, [pagination, router]);
 
   if (isCardsLoading) {
     return (
@@ -57,84 +124,68 @@ export const DashboardPageContent = () => {
 
   return (
     <>
-      <ul className="grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {cards.map((card) => (
-          <li
-            key={card.id}
-            className="group relative z-10 transition-all duration-200 hover:-translate-y-0.5"
-          >
-            <div className="absolute inset-px z-0 rounded-lg bg-white" />
-
+      <div className="flex flex-col gap-4">
+        <Card>
+          <CardContent className="group relative z-10 p-1">
+            {/* <div className="absolute inset-px z-0 rounded-lg bg-white" /> */}
             <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
 
-            <div className="relative z-10 p-6">
-              <div className="mb-6 flex items-center gap-4">
-                <div
-                  className="size-12 rounded-full"
-                  style={{
-                    backgroundColor: "#f3f4f6",
-                  }}
-                />
-
-                <div>
-                  <h3 className="text-lg/7 font-medium tracking-tight text-gray-950">
-                    {"📂"} {card.lastname}
-                  </h3>
-                  <p className="text-sm/6 text-gray-600">
-                    {format(card.createdAt, "MMM d, yyyy")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-6 space-y-3">
-                <div className="flex items-center text-sm/5 text-gray-600">
-                  <Clock className="mr-2 size-4 text-brand-500" />
-                  <span className="font-medium">Last ping:</span>
-                  <span className="ml-1">
-                    {formatDistanceToNow(card.createdAt) + " ago"}
-                  </span>
-                </div>
-                <div className="flex items-center text-sm/5 text-gray-600">
-                  <Database className="mr-2 size-4 text-brand-500" />
-                  <span className="font-medium">Всего:</span>
-                  <span className="ml-1">{cardsTotal || 0}</span>
-                </div>
-                <div className="flex items-center text-sm/5 text-gray-600">
-                  <BarChart2 className="mr-2 size-4 text-brand-500" />
-                  <span className="font-medium">Events this month:</span>
-                  <span className="ml-1">{0}</span>
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between">
-                <Link
-                  href={`/dashboard/card/${card.id}`}
-                  className={buttonVariants({
-                    variant: "outline",
-                    size: "sm",
-                    className: "flex items-center gap-2 text-sm",
-                  })}
-                >
-                  Просмотр <ArrowRight className="size-4" />
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 transition-colors hover:text-red-600"
-                  aria-label={`Удалить карточку ${card.lastname}`}
-                  onClick={() =>
-                    setDeletingCard(
-                      `${card.lastname} ${card.firstname[0]}.${card.middlename?.at(0)}.`,
-                    )
-                  }
-                >
-                  <Trash2 className="size-5" />
-                </Button>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+              <TableBody>
+                {isCardsLoading ? (
+                  [...Array(5)].map((_, rowIndex) => (
+                    <TableRow key={rowIndex}>
+                      {columns.map((_, cellIndex) => (
+                        <TableCell key={cellIndex}>
+                          <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
 
       <Modal
         showModal={!!deletingCard}
@@ -159,7 +210,10 @@ export const DashboardPageContent = () => {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => deletingCard && deleteCard(deletingCard)}
+              onClick={() =>
+                deletingCard &&
+                deleteCard({ id: deletingCard }, { onSuccess: onSuccessCbk })
+              }
               disabled={isDeletingCard}
             >
               {isDeletingCard ? "Удаление..." : "Удалить"}

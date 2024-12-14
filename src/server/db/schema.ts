@@ -82,7 +82,7 @@ export const card = pgTable(
     // ),
     // admissionComment: text("admission_comment"),
     graduateYear: integer("graduate_year"),
-    exclusionDate: date("exclusion_date"),
+    exclusionDate: date("exclusion_date", { mode: "date" }),
     exclusionComment: text("exclusion_comment"),
     // exclusionYear: integer("exclusion_year").generatedAlwaysAs(
     //   (): SQL => sql`YEAR(${card.exclusionDate})`,

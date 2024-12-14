@@ -13,7 +13,7 @@ export const parseColor = (color: string) => {
 export function shortenFullName(
   lastname: string,
   firstname: string,
-  middlname: string | null,
+  middlname: string | null = null,
 ): string {
   return `${lastname} ${firstname.at(0)}.${middlname ? middlname.at(0) + "." : ""}`;
 }

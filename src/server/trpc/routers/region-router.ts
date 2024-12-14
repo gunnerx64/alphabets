@@ -1,91 +1,85 @@
-import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { count, desc, eq } from "drizzle-orm";
-import { router } from "../__internals/router";
-import { privateProcedure, userProcedure } from "../procedures";
+import { asc, count, desc, eq } from "drizzle-orm";
 import { db, table } from "@/server/db";
 import { CardUpsertValidator, CardsQueryValidator } from "@/lib/validators";
+import { privateProcedure, router } from "@/server/trpc/trpc";
+import { TRPCError } from "@trpc/server";
+import { CardInsert } from "@/server/db/schema";
 
-const { card } = table;
+const { region } = table;
 
-export const cardRouter = router({
-  getCards: privateProcedure
-    .input(CardsQueryValidator)
-    // .input(z.void())
-    .query(async ({ c, ctx, input }) => {
-      throw new HTTPException(410, {
-        message: `Hello`,
+export const regionRouter = router({
+  getRegionOptions: privateProcedure
+    .output(
+      z.array(z.object({ id: z.string().uuid(), title: z.string().min(1) })),
+    )
+    .query(async () => {
+      const regions = await db.query.region.findMany({
+        columns: { id: true, title: true },
       });
-      console.log("INPUPt = ", input);
-      // const now = new Date();
-      // const firstDayOfMonth = startOfMonth(now);
-      const offset = ((input.page as number) - 1) * (input.pageSize as number);
-      const cards = await db.query.card.findMany({
-        with: {
-          region: true,
-          createdBy: true,
-          updatedBy: true,
-        },
-        orderBy: desc(table.card.createdAt),
-        //TODO: make adv. search
-        //where: { userId: ctx.user.id },
-        limit: input.pageSize,
-        offset,
-      });
-      console.log(
-        `getCards: page ${input.page}, limit ${input.pageSize}, got ${cards.length} items`,
-      );
+      // console.log(`getRegions: `, regions);
 
-      return c.superjson(cards);
+      return regions;
     }),
 
-  getCardsCount: privateProcedure.query(async ({ c, ctx }) => {
-    const total = await db.select({ count: count() }).from(table.card);
-    console.log("Total cards: ", total);
-    return c.superjson(total[0].count);
-  }),
-  /**
-   * Fetch single card by id
-   */
-  getCard: privateProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ c, input, ctx }) => {
-      const fetchedCard = await db.query.card.findFirst({
-        with: {
-          region: true,
-          createdBy: true,
-          updatedBy: true,
-        },
-        where: eq(card.id, input.id),
-      });
+  // getCardsCount: privateProcedure.query(async ({ ctx }) => {
+  //   const total = await db.select({ count: count() }).from(table.card);
+  //   console.log("Total cards: ", total);
+  //   return total[0].count;
+  // }),
+  // /**
+  //  * Fetch single card by id
+  //  */
+  // getCard: privateProcedure
+  //   .input(z.object({ id: z.string().uuid() }))
+  //   .query(async ({ input, ctx }) => {
+  //     const fetchedCard = await db.query.card.findFirst({
+  //       with: {
+  //         region: true,
+  //         createdBy: true,
+  //         updatedBy: true,
+  //       },
+  //       where: eq(card.id, input.id),
+  //     });
 
-      if (!fetchedCard)
-        throw new HTTPException(404, {
-          message: `Алфавитка с id ${input.id} не найдена`,
-        });
+  //     if (!fetchedCard)
+  //       throw new TRPCError({
+  //         code: "NOT_FOUND",
+  //         message: `Алфавитка с id ${input.id} не найдена`,
+  //       });
 
-      return c.superjson(fetchedCard);
-    }),
+  //     return fetchedCard;
+  //   }),
 
-  deleteCard: privateProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .mutation(async ({ c, input, ctx }) => {
-      await db.delete(card).where(eq(card.id, input.id));
+  // deleteCard: privateProcedure
+  //   .input(z.object({ id: z.string().uuid() }))
+  //   .mutation(async ({ input, ctx }) => {
+  //     await db.delete(card).where(eq(card.id, input.id));
 
-      return c.json({ success: true });
-    }),
+  //     return { success: true };
+  //   }),
 
-  createCard: userProcedure
-    .input(CardUpsertValidator)
-    .mutation(async ({ c, ctx, input }) => {
-      const { user } = ctx;
+  // upsertCard: privateProcedure
+  //   .input(CardUpsertValidator)
+  //   .mutation(async ({ ctx, input }) => {
+  //     const { user } = ctx;
+  //     console.log(
+  //       input.id ? `updating card ${input.id}...` : "creating new card...",
+  //     );
+  //     const values: CardInsert = {
+  //       ...input,
+  //       updatedByUserId: input.id ? user.id : null,
+  //     };
 
-      // TODO: ADD PAID PLAN LOGIC
+  //     const upsertedCard = await db
+  //       .insert(card)
+  //       .values(values)
+  //       .onConflictDoUpdate({ target: card.id, set: input })
+  //       .returning({ id: card.id });
 
-      const newCard = await db.insert(card).values(input);
-
-      return c.json(newCard);
-    }),
+  //     console.log("successfully upserted card: ", upsertedCard);
+  //     return upsertedCard.at(0);
+  //   }),
   // insertQuickstartCategories: privateProcedure.mutation(async ({ ctx, c }) => {
   //   const categories = await db.eventCategory.createMany({
   //     data: [

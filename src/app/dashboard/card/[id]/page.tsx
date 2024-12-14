@@ -1,10 +1,9 @@
 import { notFound, redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import { DashboardPage } from "@/components/dashboard-page";
 import { CardPageContent } from "./card-page-content";
 import { auth } from "@/server/auth";
-import { client } from "@/lib/client";
 import { db, table } from "@/server/db";
-import { eq } from "drizzle-orm";
 import { shortenFullName } from "@/utils";
 
 interface PageProps {
@@ -26,11 +25,6 @@ const Page = async ({ params }: PageProps) => {
   // if (!auth) {
   //   return notFound()
   // }
-
-  const fetchCard = async () => {
-    const res = await client.card.getCard.$get({ id });
-    return await res.json();
-  };
 
   const card = await db.query.card.findFirst({
     with: {

@@ -1,5 +1,7 @@
 import { CardInsert } from "@/server/db/schema";
 import { z } from "zod";
+import { MaxAllowedBirthYear, MinAllowedBirthYear } from "@/config";
+import { zod } from "./zod-helpers";
 
 export type InferZodMap<T extends abstract new (...args: any) => any> = {
   [k in keyof Partial<InstanceType<T>>]?: unknown;
@@ -7,35 +9,44 @@ export type InferZodMap<T extends abstract new (...args: any) => any> = {
 
 export const CardsQueryValidator = z.object({
   page: z.number().min(1).optional().default(1),
-  itemsPerPage: z.number().optional().default(10),
+  pageSize: z.number().min(5).max(50).optional().default(10),
 });
 
-export const CardCreationValidator: z.ZodType<CardInsert> = z.object({
-  lastname: z.string({ required_error: "Не указана фамилия" }),
-  firstname: z.string({ required_error: "Не указано имя" }),
+export const CardUpsertValidator: z.ZodType<CardInsert> = z.object({
+  id: z.string().uuid().optional(),
+  lastname: zod.string("Не указана фамилия"),
+  firstname: zod.string("Не указано имя"),
   middlename: z.string().optional(),
   token: z.string().optional(),
-  birthdate: z.coerce.date({
-    required_error: "Не указана дата рождения",
-  }),
+  birthdate: zod.stringDate().refine((value) => {
+    const year = value.getFullYear();
+    return MinAllowedBirthYear <= year && year <= MaxAllowedBirthYear;
+  }, `Год рождения от ${MinAllowedBirthYear} до ${MaxAllowedBirthYear}`),
   rankComment: z.string().optional(),
-  regionId: z.string({ required_error: "Не указан регион" }).uuid(),
-  admissionYear: z
-    .number({ required_error: "Не указан год поступления" })
+  regionId: zod.string("Укажите регион").uuid(),
+  admissionYear: z.coerce
+    .number({
+      required_error: "Не указан год поступления",
+      invalid_type_error: "Некорректный год",
+    })
     .min(1922, "Год поступления должен быть в диапазоне [1922:1991]")
     .max(1991, "Год поступления должен быть в диапазоне [1922:1991]"),
-  graduateYear: z
-    .number()
+  graduateYear: z.coerce
+    .number({
+      required_error: "Не указан год поступления",
+      invalid_type_error: "Некорректный год",
+    })
     .min(1922, "Год выпуска должен быть в диапазоне [1922:1991]")
     .max(1991, "Год выпуска должен быть в диапазоне [1922:1991]")
     .optional(),
-  //exclusionDate: z.coerce.date().optional().transform((x) => x ? new Date(x) : undefined),
+  exclusionDate: zod.stringDate().optional(),
   exclusionComment: z.string().optional(),
   scanUrl: z.string({ required_error: "Не указана ссылка на скан" }),
   // createdAt: timestamp("created_at").defaultNow().notNull(),
   createdByUserId: z
-    .string({ required_error: "Не указан id создателя алфавитки" })
-    .uuid(),
+    .string(/*{ required_error: "Не указан id создателя алфавитки" }*/)
+    .uuid()
+    .optional(),
   // updatedAt: timestamp("updated_at")
   //   .defaultNow()
   //   .$onUpdate(() => new Date()),

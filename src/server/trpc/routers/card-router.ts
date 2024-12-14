@@ -1,24 +1,22 @@
-import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { count, desc, eq } from "drizzle-orm";
-import { router } from "../__internals/router";
-import { privateProcedure, userProcedure } from "../procedures";
 import { db, table } from "@/server/db";
 import { CardUpsertValidator, CardsQueryValidator } from "@/lib/validators";
+import { privateProcedure, router } from "@/server/trpc/trpc";
+import { TRPCError } from "@trpc/server";
+import { CardInsert } from "@/server/db/schema";
 
 const { card } = table;
 
 export const cardRouter = router({
   getCards: privateProcedure
-    .input(CardsQueryValidator)
+    //.input(CardsQueryValidator)
     // .input(z.void())
-    .query(async ({ c, ctx, input }) => {
-      throw new HTTPException(410, {
-        message: `Hello`,
-      });
-      console.log("INPUPt = ", input);
+    .query(async (/*{ input }*/) => {
+      //   console.log("INPUPt = ", input);
       // const now = new Date();
       // const firstDayOfMonth = startOfMonth(now);
+      const input = { page: 1, pageSize: 10 };
       const offset = ((input.page as number) - 1) * (input.pageSize as number);
       const cards = await db.query.card.findMany({
         with: {
@@ -36,20 +34,20 @@ export const cardRouter = router({
         `getCards: page ${input.page}, limit ${input.pageSize}, got ${cards.length} items`,
       );
 
-      return c.superjson(cards);
+      return cards;
     }),
 
-  getCardsCount: privateProcedure.query(async ({ c, ctx }) => {
+  getCardsCount: privateProcedure.query(async ({ ctx }) => {
     const total = await db.select({ count: count() }).from(table.card);
     console.log("Total cards: ", total);
-    return c.superjson(total[0].count);
+    return total[0].count;
   }),
   /**
    * Fetch single card by id
    */
   getCard: privateProcedure
     .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ c, input, ctx }) => {
+    .query(async ({ input, ctx }) => {
       const fetchedCard = await db.query.card.findFirst({
         with: {
           region: true,
@@ -60,31 +58,42 @@ export const cardRouter = router({
       });
 
       if (!fetchedCard)
-        throw new HTTPException(404, {
+        throw new TRPCError({
+          code: "NOT_FOUND",
           message: `Алфавитка с id ${input.id} не найдена`,
         });
 
-      return c.superjson(fetchedCard);
+      return fetchedCard;
     }),
 
   deleteCard: privateProcedure
     .input(z.object({ id: z.string().uuid() }))
-    .mutation(async ({ c, input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       await db.delete(card).where(eq(card.id, input.id));
 
-      return c.json({ success: true });
+      return { success: true };
     }),
 
-  createCard: userProcedure
+  upsertCard: privateProcedure
     .input(CardUpsertValidator)
-    .mutation(async ({ c, ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { user } = ctx;
+      console.log(
+        input.id ? `updating card ${input.id}...` : "creating new card...",
+      );
+      const values: CardInsert = {
+        ...input,
+        updatedByUserId: input.id ? user.id : null,
+      };
 
-      // TODO: ADD PAID PLAN LOGIC
+      const upsertedCard = await db
+        .insert(card)
+        .values(values)
+        .onConflictDoUpdate({ target: card.id, set: input })
+        .returning({ id: card.id });
 
-      const newCard = await db.insert(card).values(input);
-
-      return c.json(newCard);
+      console.log("successfully upserted card: ", upsertedCard);
+      return upsertedCard.at(0);
     }),
   // insertQuickstartCategories: privateProcedure.mutation(async ({ ctx, c }) => {
   //   const categories = await db.eventCategory.createMany({

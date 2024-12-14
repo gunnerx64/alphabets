@@ -17,3 +17,7 @@ export const AUTH_CUSTOM_ID = process.env.AUTH_CUSTOM_ID;
 export const AUTH_CUSTOM_SECRET = process.env.AUTH_CUSTOM_SECRET;
 export const AUTH_GOOGLE_ID = process.env.AUTH_GOOGLE_ID;
 export const AUTH_GOOGLE_SECRET = process.env.AUTH_GOOGLE_SECRET;
+
+export const MinAllowedBirthYear = 1900;
+
+export const MaxAllowedBirthYear = 1980;

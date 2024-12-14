@@ -4,11 +4,10 @@ import { PlusIcon } from "lucide-react";
 import { DashboardPage } from "@/components/dashboard-page";
 import { auth } from "@/server/auth";
 import { DashboardPageContent } from "./dashboard-page-content";
-import { CreateCardModal } from "@/components/create-card-modal";
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession } from "@/lib/stripe";
 import { PaymentSuccessModal } from "@/components/payment-success-modal";
 import { db, table } from "@/server/db";
+import Link from "next/link";
 
 interface PageProps {
   searchParams: {
@@ -51,16 +50,19 @@ const Page = async ({ searchParams }: PageProps) => {
 
       <DashboardPage
         cta={
-          <CreateCardModal>
+          <Link href={"/dashboard/card/create"}>
             <Button className="w-full sm:w-fit">
               <PlusIcon className="mr-2 size-4" />
               Добавить алфавитку
             </Button>
-          </CreateCardModal>
+          </Link>
         }
         title="Алфавитки"
       >
-        <DashboardPageContent />
+        <DashboardPageContent
+          isAdmin={user.role == "admin"}
+          isGuest={user.role == "guest"}
+        />
       </DashboardPage>
     </>
   );
