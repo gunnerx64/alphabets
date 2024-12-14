@@ -1,22 +1,15 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { LucideProps } from "lucide-react";
 import { Heading } from "@/components/heading";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { client } from "@/lib/client";
+import { trpc } from "@/lib/trpc-client";
 
 export default function Page() {
   const router = useRouter();
-
-  const { data } = useQuery({
-    queryFn: async () => {
-      const res = await client.user.getDatabaseSyncStatus.$get();
-      return await res.json();
-    },
-    queryKey: ["get-database-sync-status"],
-    refetchInterval: (query) => {
+  const { data } = trpc.user.getDatabaseSyncStatus.useQuery(undefined, {
+    refetchInterval(query) {
       return query.state.data?.isSynced ? false : 1000;
     },
   });

@@ -178,7 +178,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       if (profile) {
         console.log(`appending profile object: ${JSON.stringify(profile)}`);
         // Store the provider's access token in the token so that we can put it in the session in the session callback above
-        token.id = profile.id;
+        token.id = profile.id || profile.sub;
         token.nickname = profile.nickname;
         token.position = profile.position;
         token.unit = profile.unit;
