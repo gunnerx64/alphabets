@@ -1,9 +1,6 @@
 "use client";
-
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
+import { useEffect, useMemo, useRef } from "react";
+import { FormProvider } from "react-hook-form";
 import { Button } from "./ui/button";
 import { CardInsert } from "@/server/db/schema";
 import { CardUpsertValidator } from "@/lib/validators";
@@ -14,18 +11,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { trpc } from "@/lib/trpc-client";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-import FormTextField from "./form-textfield";
+import FormTextField from "./form/form-textfield";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { parse } from "date-fns";
-import { ru } from "date-fns/locale";
-import FormMaskTextField from "./form-mask-textfield";
-import FormTextArea from "./form-textarea";
-import FormCombobox from "./form-combobox";
+import FormMaskTextField from "./form/form-mask-textfield";
+import FormTextArea from "./form/form-textarea";
+import FormCombobox from "./form/form-combobox";
 import { AlertDialogBase } from "./alert-dialog-base";
 import { addLineBreak } from "@/lib/addLineBreak";
+import { OptionItem } from "@/types";
+import { api } from "@/trpc/react";
 
 // type CardUpsert = z.infer<typeof CardFormValidator>;
 
@@ -47,13 +43,36 @@ const cardFormDefaultValues = {
 
 interface CardFormProps {
   mode?: "create" | "edit";
+  regions: OptionItem[];
   editCard?: CardInsert;
 }
 
-export const CardForm = ({ mode = "create", editCard }: CardFormProps) => {
+export const CardForm = ({
+  mode = "create",
+  regions,
+  editCard,
+}: CardFormProps) => {
   const router = useRouter();
+  // const { mutate: upsertCard, isPending: isUpserting } =
+  //   trpc.card.upsertCard.useMutation({
+  //     onSuccess(data, variables, context) {
+  //       console.log("success: ", data);
+  //       toast({
+  //         title: `${mode === "create" ? "Создание" : "Редактирование"}`,
+  //         content: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
+  //       });
+  //       if (data) router.push(`/dashboard/card/${data.id}`);
+  //     },
+  //     onError(error) {
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Ошибка",
+  //         content: "Произошла ошибка: " + error.message,
+  //       });
+  //     },
+  //   });
   const { mutate: upsertCard, isPending: isUpserting } =
-    trpc.card.upsertCard.useMutation({
+    api.card.upsertCard.useMutation({
       onSuccess(data, variables, context) {
         console.log("success: ", data);
         toast({
@@ -70,7 +89,12 @@ export const CardForm = ({ mode = "create", editCard }: CardFormProps) => {
         });
       },
     });
-  const { data: regions } = trpc.region.getRegionOptions.useQuery();
+
+  // const { data: regions } = trpc.region.getRegionOptions.useQuery();
+  // const { data: regions } = useQuery({
+  //   queryKey: ["region-options"],
+  //   queryFn: async () => getRegionOptionsAction,
+  // });
 
   const cardForm = useZodForm({
     schema: CardUpsertValidator,
@@ -106,7 +130,7 @@ export const CardForm = ({ mode = "create", editCard }: CardFormProps) => {
     // data.birthdate = data.birthdate_ru
     //   ? parse(data.birthdate_ru, "dd.MM.yyyy", new Date(), { locale: ru })
     //   : null;
-    console.log("submitting/// ", data);
+    console.log("submitting... ", data);
     upsertCard(data);
   };
 
@@ -260,13 +284,13 @@ export const CardForm = ({ mode = "create", editCard }: CardFormProps) => {
                 <Button
                   className="w-[200px]"
                   disabled={isUpserting}
-                  type="button"
-                  onClick={() => {
-                    console.log("SUBM CLICK");
-                    clearFormErrors();
-                    validateForm();
-                    // cardFormRef.current..req.handleSubmit();
-                  }}
+                  type="submit"
+                  // onClick={async () => {
+                  //   console.log("SUBM CLICK");
+                  //   clearFormErrors();
+                  //   await validateForm();
+                  //   // cardFormRef.current.handleSubmit(cardFormRef.current.getValues());
+                  // }}
                 >
                   {buttonCaption}
                 </Button>

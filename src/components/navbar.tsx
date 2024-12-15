@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MaxWidthWrapper } from "./max-width-wrapper";
+import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import { Button, buttonVariants } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import { auth } from "@/server/auth";

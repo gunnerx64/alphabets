@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { LucideProps } from "lucide-react";
 import { Heading } from "@/components/heading";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { trpc } from "@/lib/trpc-client";
+import { api } from "@/trpc/react";
 
 export default function Page() {
   const router = useRouter();
-  const { data } = trpc.user.getDatabaseSyncStatus.useQuery(undefined, {
+  const { data } = api.user.getDatabaseSyncStatus.useQuery(undefined, {
     refetchInterval(query) {
       return query.state.data?.isSynced ? false : 1000;
     },

@@ -1,26 +1,13 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, formatDistanceToNow } from "date-fns";
-import { ArrowRight, BarChart2, Clock, Database, Trash2 } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
 import { DashboardEmptyState } from "./dashboard-empty-state";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-
 import {
-  ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
-  Row,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -32,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { buildCardColumns } from "./columns";
-import { trpc } from "@/lib/trpc-client";
+import { api } from "@/trpc/react";
 
 interface DashboardPageContentProps {
   isAdmin: boolean;
@@ -50,29 +37,17 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
     pageSize: pageSize,
   });
 
-  const [deletingCard, setDeletingCard] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-
-  const { data: cards, isPending: isCardsLoading } =
-    trpc.card.getCards.useQuery(
-      /*{
-      page: pagination.pageIndex,
+  const { data: cards, isPending: isCardsLoading } = api.card.getCards.useQuery(
+    {
+      page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
-    }*/ undefined,
-      {
-        refetchInterval: 5000,
-      },
-    );
+    },
+    {
+      refetchInterval: 30000,
+    },
+  );
   console.log("cards = ", cards);
-  const { data: cardsTotal } = trpc.card.getCardsCount.useQuery();
-
-  const { mutate: deleteCard, isPending: isDeletingCard } =
-    trpc.card.deleteCard.useMutation();
-  const onSuccessCbk = () => {
-    queryClient.invalidateQueries({ queryKey: ["get-cards"] });
-    queryClient.invalidateQueries({ queryKey: ["get-cards-total"] });
-    setDeletingCard(null);
-  };
+  const { data: cardsTotal } = api.card.getCardsCount.useQuery();
 
   const columns = useMemo(
     () => buildCardColumns(isAdmin, isGuest),
@@ -186,41 +161,6 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
           </CardContent>
         </Card>
       </div>
-
-      <Modal
-        showModal={!!deletingCard}
-        setShowModal={() => setDeletingCard(null)}
-        className="max-w-md p-8"
-      >
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg/7 font-medium tracking-tight text-gray-950">
-              Удаление карточки
-            </h2>
-            <p className="text-sm/6 text-gray-600">
-              Вы действительно хотите удалить карточку "{deletingCard}"?
-              <br />
-              Это действие не может быть отменено.
-            </p>
-          </div>
-
-          <div className="flex justify-end space-x-3 border-t pt-4">
-            <Button variant="outline" onClick={() => setDeletingCard(null)}>
-              Отмена
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() =>
-                deletingCard &&
-                deleteCard({ id: deletingCard }, { onSuccess: onSuccessCbk })
-              }
-              disabled={isDeletingCard}
-            >
-              {isDeletingCard ? "Удаление..." : "Удалить"}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };

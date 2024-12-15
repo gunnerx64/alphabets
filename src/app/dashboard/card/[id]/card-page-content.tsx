@@ -1,7 +1,5 @@
 "use client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { client } from "@/lib/client";
+import { useMemo } from "react";
 import {
   Clock,
   Database,
@@ -15,7 +13,12 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import type { CardWithRefs } from "@/server/db/schema";
-import { Modal } from "@/components/ui/modal";
+import { TooltipBase } from "@/components/tooltip-base";
+import { AlertDialogBase } from "@/components/alert-dialog-base";
+import { addLineBreak } from "@/lib/addLineBreak";
+import { shortenFullName } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import { toast } from "@/hooks/use-toast";
 
 interface DataElementProps {
   Icon?: React.ComponentType<{ className?: string }>;
@@ -31,27 +34,30 @@ const DataElement = ({ title, content: value, Icon }: DataElementProps) => (
 );
 
 interface CardPageContentProps {
-  //hasEvents: boolean;
   card: CardWithRefs;
 }
-export const CardPageContent = ({
-  //hasEvents: initialHasEvents,
-  card,
-}: CardPageContentProps) => {
-  const [deletingCard, setDeletingCard] = useState<string | null>(null);
-
-  const queryClient = useQueryClient();
-
-  const { mutate: deleteCard, isPending: isDeletingCard } = useMutation({
-    mutationFn: async (id: string) => {
-      await client.card.deleteCard.$post({ id });
+export const CardPageContent = ({ card }: CardPageContentProps) => {
+  const [fullName] = useMemo(
+    () => shortenFullName(card.lastname, card.firstname, card.middlename),
+    [card],
+  );
+  const deleteMutation = api.card.deleteCard.useMutation({
+    onSuccess() {
+      toast({
+        variant: "default",
+        title: `Удаление`,
+        description: `Карточка "${fullName}" удалена.`,
+      });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["get-cards"] });
-      queryClient.invalidateQueries({ queryKey: ["get-cards-total"] });
-      setDeletingCard(null);
+    onError(error) {
+      toast({
+        variant: "destructive",
+        title: `Удаление`,
+        description: `Ошибка при удалении карточки: ${error.message}`,
+      });
     },
   });
+
   return (
     <>
       <div className="group relative">
@@ -97,14 +103,14 @@ export const CardPageContent = ({
                 <DataElement
                   Icon={Database}
                   title="Оцифровал"
-                  content={`${card.createdBy.fullName} (${card.createdAt.toLocaleDateString("ru-ru")} г.)`}
+                  content={`${card.createdBy.name} (${card.createdAt.toLocaleDateString("ru-ru")} г.)`}
                 />
               )}
               {card.updatedAt && card.updatedBy && (
                 <DataElement
                   Icon={Clock}
                   title="Редактировал"
-                  content={`${card.updatedBy.fullName} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
+                  content={`${card.updatedBy.name} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
                 />
               )}
             </div>
@@ -167,54 +173,32 @@ export const CardPageContent = ({
             >
               <Edit className="mr-1 size-4" /> Изменить
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-500 transition-colors hover:text-red-600"
-              aria-label={`Удалить карточку ${card.lastname}`}
-              onClick={() =>
-                setDeletingCard(
-                  `${card.lastname} ${card.firstname[0]}.${card.middlename?.at(0)}.`,
-                )
+            <AlertDialogBase
+              title="Удаление карточки"
+              desc={
+                <div className="text-red-600">
+                  {addLineBreak(
+                    `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
+                  )}
+                </div>
               }
+              confirmCallback={() => deleteMutation.mutate({ id: card.id })}
             >
-              <Trash2 className="size-5" />
-            </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 transition-colors hover:text-red-600"
+                aria-label={`Удалить карточку ${fullName}`}
+              >
+                {" "}
+                <TooltipBase title="Удалить карточку">
+                  <Trash2 className="size-5" />
+                </TooltipBase>
+              </Button>
+            </AlertDialogBase>
           </div>
         </div>
       </div>
-
-      <Modal
-        showModal={!!deletingCard}
-        setShowModal={() => setDeletingCard(null)}
-        className="max-w-md p-8"
-      >
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg/7 font-medium tracking-tight text-gray-950">
-              Удаление карточки
-            </h2>
-            <p className="text-sm/6 text-gray-600">
-              Вы действительно хотите удалить карточку "{deletingCard}"?
-              <br />
-              Это действие не может быть отменено.
-            </p>
-          </div>
-
-          <div className="flex justify-end space-x-3 border-t pt-4">
-            <Button variant="outline" onClick={() => setDeletingCard(null)}>
-              Отмена
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deletingCard && deleteCard(deletingCard)}
-              disabled={isDeletingCard}
-            >
-              {isDeletingCard ? "Удаление..." : "Удалить"}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };

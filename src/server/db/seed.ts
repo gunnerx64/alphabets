@@ -1,7 +1,8 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { faker } from "@faker-js/faker";
-import { region } from "@/server/db/schema";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import pg from "pg";
+// import { faker } from "@faker-js/faker";
+import * as schema from "./schema";
 import "@/envConfig";
 
 if (!("DATABASE_URL" in process.env))
@@ -13,29 +14,34 @@ const staticRegions = [
 ];
 
 const main = async () => {
-  const client = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  });
-  const db = drizzle(client);
+  if (!process.env.DATABASE_URL) {
+    console.log("env DATABASE_URL is not set");
+    process.exit(1);
+  }
+  const client = postgres(process.env.DATABASE_URL);
 
-  const regions = await db.select().from(region);
+  const db = drizzle(client, { schema });
+
+  const foundRegions = await db.select().from(schema.regions);
   // console.log(`regions: ${regions.length}`);
-  if (regions.length < 1) {
-    const data: (typeof region.$inferInsert)[] = [];
+  if (foundRegions.length < 1) {
+    const data: (typeof schema.regions.$inferInsert)[] = [];
     let sort = 0;
     for (let s = 0; s < staticRegions.length; s++) {
       for (let i = 0; i < staticRegions[s].regions.length; i++) {
         data.push({
-          state: staticRegions[s].state,
-          title: staticRegions[s].regions[i],
+          state: staticRegions[s]?.state,
+          title: staticRegions[s]?.regions[i],
           sort: sort++,
         });
       }
     }
     console.log("Seed regions started");
-    await db.insert(region).values(data);
-    console.log(`Seed regions completed (count: ${await db.$count(region)})`);
-  } else console.log(`Seed regions skipped (count: ${regions.length})`);
+    await db.insert(schema.regions).values(data);
+    console.log(
+      `Seed regions completed (count: ${await db.$count(schema.regions)})`,
+    );
+  } else console.log(`Seed regions skipped (count: ${foundRegions.length})`);
 
   // const data: (typeof users.$inferInsert)[] = [];
 
@@ -49,6 +55,7 @@ const main = async () => {
   // console.log("Seed start");
   // await db.insert(users).values(data);
   console.log("Seed done");
+  process.exit(0);
 };
 
 main();

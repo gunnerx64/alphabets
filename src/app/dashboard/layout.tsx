@@ -1,12 +1,14 @@
 "use client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { cn } from "@/utils";
+import { cn } from "@/lib/utils";
 import { Gem, Home, Key, LucideIcon, Menu, Settings, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { PropsWithChildren, useState } from "react";
-import { Drawer } from "vaul";
+// import { Drawer } from "vaul";
+
+//? TODO: wrap children in server protected component
 
 interface SidebarItem {
   href: string;

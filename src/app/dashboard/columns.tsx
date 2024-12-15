@@ -1,19 +1,18 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { PrinterIcon, XSquare } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardWithRefs } from "@/server/db/schema";
-import { useSession } from "next-auth/react";
 import { addLineBreak } from "@/lib/addLineBreak";
-import { client } from "@/lib/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+// import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { TinyBadge } from "@/components/tiny-badge";
 import { TooltipBase } from "@/components/tooltip-base";
 import { AlertDialogBase } from "@/components/alert-dialog-base";
-import Link from "next/link";
+import { api } from "@/trpc/react";
 
 const columnHelper = createColumnHelper<CardWithRefs>();
 
@@ -49,7 +48,7 @@ export const buildCardColumns = (
       const birthdate = info.row.original.birthdate.toLocaleDateString("ru-ru");
       const token = info.row.original.token;
       const rankComment = info.row.original.rankComment;
-      const updatedBy = info.row.original.updatedBy?.fullName;
+      const updatedBy = info.row.original.updatedBy?.name;
       const updatedAt = info.row.original.updatedAt
         ? `${info.row.original.updatedAt.toLocaleTimeString(
             "ru-RU",
@@ -166,19 +165,22 @@ export const buildCardColumns = (
       const { data: session } = useSession();
       if (!session) return null;
       console.log(`session expires in ${session.expires}`);
-
-      const queryClient = useQueryClient();
-      const { mutate: deleteCard, isPending: isDeletingCard } = useMutation({
-        mutationFn: async (id: string) => {
-          await client.card.deleteCard.$post({ id });
-        },
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["get-cards"] });
-          queryClient.invalidateQueries({ queryKey: ["get-cards-total"] });
+      const utils = api.useUtils();
+      const deleteMutation = api.card.deleteCard.useMutation({
+        onSuccess(data, variables, context) {
+          utils.card.getCards.invalidate();
+          utils.card.getCardsCount.invalidate();
           toast({
             variant: "default",
             title: `Удаление`,
             description: `Карточка ${lastname} удалена.`,
+          });
+        },
+        onError(error, variables, context) {
+          toast({
+            variant: "destructive",
+            title: `Удаление`,
+            description: `Ошибка при удалении карточки: ${error.message}`,
           });
         },
       });
@@ -225,14 +227,14 @@ export const buildCardColumns = (
                   )}
                 </div>
               }
-              confirmCallback={() => deleteCard(cardId)}
+              confirmCallback={() => deleteMutation.mutate({ id: cardId })}
             >
               <Button
                 // key={`remove-${row.id}`}
                 size="icon"
                 variant="outline"
                 className="text-red-500 hover:text-red-700"
-                disabled={isDeletingCard}
+                disabled={deleteMutation.isPending}
               >
                 <TooltipBase title="Удалить карточку">
                   <XSquare size={20} />

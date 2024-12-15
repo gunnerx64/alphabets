@@ -5,14 +5,15 @@ import { DashboardPage } from "@/components/dashboard-page";
 import { auth } from "@/server/auth";
 import { DashboardPageContent } from "./dashboard-page-content";
 import { Button } from "@/components/ui/button";
-import { PaymentSuccessModal } from "@/components/payment-success-modal";
-import { db, table } from "@/server/db";
+// import { PaymentSuccessModal } from "@/components/payment-success-modal";
+import { db } from "@/server/db";
 import Link from "next/link";
+import { users } from "@/server/db/schema";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 }
 
 const Page = async ({ searchParams }: PageProps) => {
@@ -22,16 +23,16 @@ const Page = async ({ searchParams }: PageProps) => {
     redirect("/signin");
   }
 
-  const user = await db.query.user.findFirst({
+  const user = await db.query.users.findFirst({
     columns: { id: true, name: true, role: true, active: true },
-    where: eq(table.user.externalId, session.user.id),
+    where: eq(users.id, session.user.id),
   });
 
   if (!user) {
+    console.warn("Strange, user is not found in db...");
     return redirect("/welcome");
   }
-
-  const intent = searchParams.intent;
+  const { intent, success } = await searchParams;
 
   // if (intent === "upgrade") {
   //   const session = await createCheckoutSession({
@@ -42,11 +43,11 @@ const Page = async ({ searchParams }: PageProps) => {
   //   if (session.url) redirect(session.url)
   // }
 
-  const success = searchParams.success;
-
   return (
     <>
-      {success ? <PaymentSuccessModal /> : null}
+      {success ? (
+        <p>Модальный успех оплаты</p> /*<PaymentSuccessModal />*/
+      ) : null}
 
       <DashboardPage
         cta={

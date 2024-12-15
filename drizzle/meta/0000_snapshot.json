@@ -1,11 +1,125 @@
 {
-  "id": "97c68ca9-7349-483a-abce-35d08fdd66e5",
+  "id": "eebab7b0-13dd-4f00-9496-bb7cb362015a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.card": {
-      "name": "card",
+    "public.alphabets_account": {
+      "name": "alphabets_account",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_account_id": {
+          "name": "provider_account_id",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token_type": {
+          "name": "token_type",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_state": {
+          "name": "session_state",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "account_user_id_idx": {
+          "name": "account_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "alphabets_account_user_id_alphabets_user_id_fk": {
+          "name": "alphabets_account_user_id_alphabets_user_id_fk",
+          "tableFrom": "alphabets_account",
+          "tableTo": "alphabets_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "alphabets_account_provider_provider_account_id_pk": {
+          "name": "alphabets_account_provider_provider_account_id_pk",
+          "columns": [
+            "provider",
+            "provider_account_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.alphabets_card": {
+      "name": "alphabets_card",
       "schema": "",
       "columns": {
         "id": {
@@ -17,25 +131,25 @@
         },
         "lastname": {
           "name": "lastname",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
         "firstname": {
           "name": "firstname",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
         "middlename": {
           "name": "middlename",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": false
         },
         "token": {
           "name": "token",
-          "type": "text",
+          "type": "varchar(32)",
           "primaryKey": false,
           "notNull": false
         },
@@ -47,7 +161,7 @@
         },
         "rank_comment": {
           "name": "rank_comment",
-          "type": "text",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
@@ -77,13 +191,13 @@
         },
         "exclusion_comment": {
           "name": "exclusion_comment",
-          "type": "text",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
         "scan_url": {
           "name": "scan_url",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
@@ -94,8 +208,8 @@
           "notNull": true,
           "default": "now()"
         },
-        "created_by_user_id": {
-          "name": "created_by_user_id",
+        "created_by_id": {
+          "name": "created_by_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -107,8 +221,8 @@
           "notNull": false,
           "default": "NULL"
         },
-        "updated_by_user_id": {
-          "name": "updated_by_user_id",
+        "updated_by_id": {
+          "name": "updated_by_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -162,10 +276,10 @@
         }
       },
       "foreignKeys": {
-        "card_region_id_region_id_fk": {
-          "name": "card_region_id_region_id_fk",
-          "tableFrom": "card",
-          "tableTo": "region",
+        "alphabets_card_region_id_alphabets_region_id_fk": {
+          "name": "alphabets_card_region_id_alphabets_region_id_fk",
+          "tableFrom": "alphabets_card",
+          "tableTo": "alphabets_region",
           "columnsFrom": [
             "region_id"
           ],
@@ -175,12 +289,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "card_created_by_user_id_user_id_fk": {
-          "name": "card_created_by_user_id_user_id_fk",
-          "tableFrom": "card",
-          "tableTo": "user",
+        "alphabets_card_created_by_id_alphabets_user_id_fk": {
+          "name": "alphabets_card_created_by_id_alphabets_user_id_fk",
+          "tableFrom": "alphabets_card",
+          "tableTo": "alphabets_user",
           "columnsFrom": [
-            "created_by_user_id"
+            "created_by_id"
           ],
           "columnsTo": [
             "id"
@@ -188,12 +302,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "card_updated_by_user_id_user_id_fk": {
-          "name": "card_updated_by_user_id_user_id_fk",
-          "tableFrom": "card",
-          "tableTo": "user",
+        "alphabets_card_updated_by_id_alphabets_user_id_fk": {
+          "name": "alphabets_card_updated_by_id_alphabets_user_id_fk",
+          "tableFrom": "alphabets_card",
+          "tableTo": "alphabets_user",
           "columnsFrom": [
-            "updated_by_user_id"
+            "updated_by_id"
           ],
           "columnsTo": [
             "id"
@@ -203,66 +317,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "uniqueConstraints": {}
     },
-    "public.oauth_account": {
-      "name": "oauth_account",
-      "schema": "",
-      "columns": {
-        "provider_id": {
-          "name": "provider_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "provider_user_id": {
-          "name": "provider_user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "oauth_account_user_id_user_id_fk": {
-          "name": "oauth_account_user_id_user_id_fk",
-          "tableFrom": "oauth_account",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "oauth_account_provider_id_provider_user_id_pk": {
-          "name": "oauth_account_provider_id_provider_user_id_pk",
-          "columns": [
-            "provider_id",
-            "provider_user_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.region": {
-      "name": "region",
+    "public.alphabets_region": {
+      "name": "alphabets_region",
       "schema": "",
       "columns": {
         "id": {
@@ -274,13 +332,13 @@
         },
         "title": {
           "name": "title",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
         "state": {
           "name": "state",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": false
         },
@@ -294,18 +352,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "uniqueConstraints": {}
     },
-    "public.session": {
-      "name": "session",
+    "public.alphabets_session": {
+      "name": "alphabets_session",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
+        "session_token": {
+          "name": "session_token",
+          "type": "varchar(255)",
           "primaryKey": true,
           "notNull": true
         },
@@ -315,19 +370,35 @@
           "primaryKey": false,
           "notNull": true
         },
-        "expires_at": {
-          "name": "expires_at",
+        "expires": {
+          "name": "expires",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "session_user_id_idx": {
+          "name": "session_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "session_user_id_user_id_fk": {
-          "name": "session_user_id_user_id_fk",
-          "tableFrom": "session",
-          "tableTo": "user",
+        "alphabets_session_user_id_alphabets_user_id_fk": {
+          "name": "alphabets_session_user_id_alphabets_user_id_fk",
+          "tableFrom": "alphabets_session",
+          "tableTo": "alphabets_user",
           "columnsFrom": [
             "user_id"
           ],
@@ -339,13 +410,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "uniqueConstraints": {}
     },
-    "public.user": {
-      "name": "user",
+    "public.alphabets_user": {
+      "name": "alphabets_user",
       "schema": "",
       "columns": {
         "id": {
@@ -355,35 +423,30 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "external_id": {
-          "name": "external_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "name": {
           "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "full_name": {
-          "name": "full_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "picture": {
-          "name": "picture",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": false
         },
         "email": {
           "name": "email",
-          "type": "text",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "image": {
+          "name": "image",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         },
         "active": {
           "name": "active",
@@ -399,62 +462,53 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'guest'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_external_id_unique": {
-          "name": "user_external_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "external_id"
-          ]
+      "uniqueConstraints": {}
+    },
+    "public.alphabets_verification_token": {
+      "name": "alphabets_verification_token",
+      "schema": "",
+      "columns": {
+        "identifier": {
+          "name": "identifier",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         },
-        "user_email_unique": {
-          "name": "user_email_unique",
-          "nullsNotDistinct": false,
+        "token": {
+          "name": "token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "alphabets_verification_token_identifier_token_pk": {
+          "name": "alphabets_verification_token_identifier_token_pk",
           "columns": [
-            "email"
+            "identifier",
+            "token"
           ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "uniqueConstraints": {}
     }
   },
-  "enums": {
-    "public.role": {
-      "name": "role",
-      "schema": "public",
-      "values": [
-        "guest",
-        "user",
-        "admin"
-      ]
-    }
-  },
+  "enums": {},
   "schemas": {},
   "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

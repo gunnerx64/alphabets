@@ -3,8 +3,10 @@ import { eq } from "drizzle-orm";
 import { DashboardPage } from "@/components/dashboard-page";
 import { CardPageContent } from "./card-page-content";
 import { auth } from "@/server/auth";
-import { db, table } from "@/server/db";
-import { shortenFullName } from "@/utils";
+import { db } from "@/server/db";
+import { cards } from "@/server/db/schema";
+import { shortenFullName } from "@/lib/utils";
+import { getCard } from "@/server/api/routers/card";
 
 interface PageProps {
   params: {
@@ -26,24 +28,7 @@ const Page = async ({ params }: PageProps) => {
   //   return notFound()
   // }
 
-  const card = await db.query.card.findFirst({
-    with: {
-      region: true,
-      createdBy: {
-        columns: {
-          id: true,
-          fullName: true,
-        },
-      },
-      updatedBy: {
-        columns: {
-          id: true,
-          fullName: true,
-        },
-      },
-    },
-    where: eq(table.card.id, id),
-  });
+  const card = await getCard(id);
 
   if (!card) return notFound();
 

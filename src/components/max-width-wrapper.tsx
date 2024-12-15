@@ -1,9 +1,9 @@
-import { cn } from "@/utils"
-import { ReactNode } from "react"
+import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 interface MaxWidthWrapperProps {
-  className?: string
-  children: ReactNode
+  className?: string;
+  children: ReactNode;
 }
 
 export const MaxWidthWrapper = ({
@@ -13,11 +13,11 @@ export const MaxWidthWrapper = ({
   return (
     <div
       className={cn(
-        "h-full mx-auto w-full max-w-screen-xl px-2.5 md:px-20",
-        className
+        "mx-auto h-full w-full max-w-screen-xl px-2.5 md:px-20",
+        className,
       )}
     >
       {children}
     </div>
-  )
-}
+  );
+};

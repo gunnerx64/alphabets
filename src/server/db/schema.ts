@@ -1,99 +1,59 @@
+import { Roles } from "@/types";
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
+  date,
+  index,
   integer,
-  pgTable,
+  pgEnum,
+  pgTableCreator,
   primaryKey,
   text,
   timestamp,
-  date,
   uuid,
-  boolean,
-  pgEnum,
-  index,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { Roles } from "@/types";
-// import { InferQueryModel } from ".";
+import { type AdapterAccount } from "next-auth/adapters";
 
-export const userRole = pgEnum("role", Roles);
+/**
+ * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
+ * database instance for multiple projects.
+ *
+ * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
+ */
+export const createTable = pgTableCreator((name) => `alphabets_${name}`);
 
-export const user = pgTable("user", {
-  id: uuid().defaultRandom().primaryKey(),
-  externalId: text("external_id").notNull().unique(),
-  name: text().notNull(),
-  fullName: text("full_name").notNull(),
-  picture: text(),
-  email: text().unique().notNull(),
-  active: boolean().notNull().default(true),
-  role: userRole().notNull().default("guest"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+export const regions = createTable("region", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 128 }).notNull(),
+  state: varchar("state", { length: 128 }),
+  sort: integer("sort"),
 });
 
-export const oauthAccount = pgTable(
-  "oauth_account",
-  {
-    provider_id: text(),
-    provider_user_id: text(),
-    user_id: uuid()
-      .notNull()
-      .references(() => user.id),
-  },
-  (table) => [
-    primaryKey({ columns: [table.provider_id, table.provider_user_id] }),
-  ],
-);
-
-export const session = pgTable("session", {
-  id: text().primaryKey(),
-  user_id: uuid()
-    .notNull()
-    .references(() => user.id),
-  expires_at: timestamp({
-    withTimezone: true,
-    mode: "date",
-  }).notNull(),
-});
-
-export const region = pgTable("region", {
-  id: uuid().defaultRandom().primaryKey(),
-  title: text().notNull(),
-  state: text(),
-  sort: integer(),
-});
-
-export const card = pgTable(
+export const cards = createTable(
   "card",
   {
-    id: uuid().defaultRandom().primaryKey(),
-    lastname: text().notNull(),
-    firstname: text().notNull(),
-    middlename: text(),
-    token: text(),
-    birthdate: date({ mode: "date" }).notNull(),
-    rankComment: text("rank_comment"),
+    id: uuid("id").defaultRandom().primaryKey(),
+    lastname: varchar("lastname", { length: 128 }).notNull(),
+    firstname: varchar("firstname", { length: 128 }).notNull(),
+    middlename: varchar("middlename", { length: 128 }),
+    token: varchar("token", { length: 32 }),
+    birthdate: date("birthdate", { mode: "date" }).notNull(),
+    rankComment: varchar("rank_comment", { length: 255 }),
     regionId: uuid("region_id")
       .notNull()
-      .references(() => region.id),
+      .references(() => regions.id),
     admissionYear: integer("admission_year").notNull(),
-    // admissionYear: integer("admission_year").generatedAlwaysAs(
-    //   (): SQL => sql`YEAR(${card.admissionDate})`,
-    // ),
-    // admissionComment: text("admission_comment"),
     graduateYear: integer("graduate_year"),
     exclusionDate: date("exclusion_date", { mode: "date" }),
-    exclusionComment: text("exclusion_comment"),
-    // exclusionYear: integer("exclusion_year").generatedAlwaysAs(
-    //   (): SQL => sql`YEAR(${card.exclusionDate})`,
-    // ),
-    scanUrl: text("scan_url").notNull(),
+    exclusionComment: varchar("exclusion_comment", { length: 255 }),
+    scanUrl: varchar("scan_url", { length: 128 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    createdByUserId: uuid("created_by_user_id").references(() => user.id),
+    createdById: uuid("created_by_id").references(() => users.id),
     updatedAt: timestamp("updated_at")
       .default(sql`NULL`)
       .$onUpdate(() => new Date()),
-    updatedByUserId: uuid("updated_by_user_id").references(() => user.id),
+    updatedById: uuid("updated_by_id").references(() => users.id),
   },
   (tbl) => {
     return {
@@ -104,41 +64,120 @@ export const card = pgTable(
   },
 );
 
-export const cardRelations = relations(card, ({ one }) => ({
-  region: one(region, {
-    fields: [card.regionId],
-    references: [region.id],
+export const cardRelations = relations(cards, ({ one }) => ({
+  region: one(regions, {
+    fields: [cards.regionId],
+    references: [regions.id],
   }),
-  createdBy: one(user, {
-    fields: [card.createdByUserId],
-    references: [user.id],
+  createdBy: one(users, {
+    fields: [cards.createdById],
+    references: [users.id],
   }),
-  updatedBy: one(user, {
-    fields: [card.updatedByUserId],
-    references: [user.id],
+  updatedBy: one(users, {
+    fields: [cards.updatedById],
+    references: [users.id],
   }),
 }));
 
-export type User = typeof user.$inferSelect;
-export type UserInsert = typeof user.$inferInsert;
+export type User = typeof users.$inferSelect;
+// export type UserInsert = typeof users.$inferInsert;
 
-export type Region = Omit<typeof region.$inferSelect, "sort">;
+export type Region = Omit<typeof regions.$inferSelect, "sort">;
 
-export type Card = typeof card.$inferSelect; //& { createdBy: User };
-
+export type Card = typeof cards.$inferSelect; //& { createdBy: User };
+export type CardInsert = typeof cards.$inferInsert;
 export type CardWithRefs = Card & { region?: Region } & {
-  createdBy: Pick<User, "id" | "fullName"> | null;
+  createdBy: Pick<User, "name"> | null;
 } & {
-  updatedBy: Pick<User, "id" | "fullName"> | null;
+  updatedBy: Pick<User, "name"> | null;
 };
 
-// export type CardWithRefs = InferQueryModel<
-//   "card",
-//   {
-//     with: {
-//       region: true;
-//     };
-//   }
-// >;
+const userRole = pgEnum("role", Roles);
 
-export type CardInsert = typeof card.$inferInsert;
+export const users = createTable("user", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 128 }),
+  email: varchar("email", { length: 64 }).notNull(),
+  emailVerified: timestamp("email_verified", {
+    mode: "date",
+    withTimezone: true,
+  }).default(sql`CURRENT_TIMESTAMP`),
+  image: varchar("image", { length: 255 }),
+  active: boolean("active").notNull().default(true),
+  role: userRole("role").notNull().default("guest"),
+});
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+}));
+
+export const accounts = createTable(
+  "account",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    type: varchar("type", { length: 64 })
+      .$type<AdapterAccount["type"]>()
+      .notNull(),
+    provider: varchar("provider", { length: 64 }).notNull(),
+    providerAccountId: varchar("provider_account_id", {
+      length: 64,
+    }).notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: varchar("token_type", { length: 255 }),
+    scope: varchar("scope", { length: 255 }),
+    id_token: text("id_token"),
+    session_state: varchar("session_state", { length: 255 }),
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+    userIdIdx: index("account_user_id_idx").on(account.userId),
+  }),
+);
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
+export const sessions = createTable(
+  "session",
+  {
+    sessionToken: varchar("session_token", { length: 255 })
+      .notNull()
+      .primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    expires: timestamp("expires", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
+  },
+  (session) => ({
+    userIdIdx: index("session_user_id_idx").on(session.userId),
+  }),
+);
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const verificationTokens = createTable(
+  "verification_token",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  }),
+);

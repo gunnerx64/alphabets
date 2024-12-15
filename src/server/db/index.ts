@@ -1,29 +1,17 @@
-// import type {
-//   BuildQueryResult,
-//   DBQueryConfig,
-//   ExtractTablesWithRelations,
-// } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-// import type { Exact } from "type-fest";
-
+import { env } from "@/env";
 import * as schema from "./schema";
 
-const driver = postgres(process.env.DATABASE_URL as string);
+/**
+ * Cache the database connection in development. This avoids creating a new connection on every HMR
+ * update.
+ */
+const globalForDb = globalThis as unknown as {
+  conn: postgres.Sql | undefined;
+};
 
-export const db = drizzle({ client: driver, schema });
-export const table = schema;
+const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
+if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
-// type TSchema = ExtractTablesWithRelations<typeof schema>;
-
-// type QueryConfig<TableName extends keyof TSchema> = DBQueryConfig<
-//   "one" | "many",
-//   boolean,
-//   TSchema,
-//   TSchema[TableName]
-// >;
-
-// export type InferQueryModel<
-//   TableName extends keyof TSchema,
-//   QBConfig extends Exact<QueryConfig<TableName>, QBConfig> = {}, // <-- notice Exact here
-// > = BuildQueryResult<TSchema, TSchema[TableName], QBConfig>;
+export const db = drizzle(conn, { schema });
