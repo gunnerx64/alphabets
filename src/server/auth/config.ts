@@ -10,6 +10,7 @@ import {
   verificationTokens,
 } from "@/server/db/schema";
 import { Role } from "@/types";
+import { env } from "@/env";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -47,21 +48,16 @@ declare module "next-auth" {
  */
 export const providers: Provider[] = [];
 
-const AUTH_CUSTOM_CODENAME = process.env.AUTH_CUSTOM_CODENAME;
-const AUTH_CUSTOM_TITLE = process.env.AUTH_CUSTOM_TITLE;
-const AUTH_CUSTOM_URL = process.env.AUTH_CUSTOM_URL;
-const AUTH_CUSTOM_ID = process.env.AUTH_CUSTOM_ID;
-const AUTH_CUSTOM_SECRET = process.env.AUTH_CUSTOM_SECRET;
 if (
-  AUTH_CUSTOM_CODENAME &&
-  AUTH_CUSTOM_TITLE &&
-  AUTH_CUSTOM_URL &&
-  AUTH_CUSTOM_ID &&
-  AUTH_CUSTOM_SECRET
+  env.AUTH_CUSTOM_CODENAME &&
+  env.AUTH_CUSTOM_TITLE &&
+  env.AUTH_CUSTOM_URL &&
+  env.AUTH_CUSTOM_ID &&
+  env.AUTH_CUSTOM_SECRET
 )
   providers.push({
-    id: AUTH_CUSTOM_CODENAME,
-    name: AUTH_CUSTOM_TITLE,
+    id: env.AUTH_CUSTOM_CODENAME,
+    name: env.AUTH_CUSTOM_TITLE,
     type: "oidc",
     /**
      * OpenID Connect (OIDC) compliant providers can configure
@@ -77,14 +73,14 @@ if (
     //     params: { grant_type: "authorization_code" },
     //   },
     authorization: {
-      url: `${AUTH_CUSTOM_URL}/authorize`,
+      url: `${env.AUTH_CUSTOM_URL}/authorize`,
       params: { scope: "openid email profile" },
     },
-    token: `${AUTH_CUSTOM_URL}/token`,
+    token: `${env.AUTH_CUSTOM_URL}/token`,
     // userinfo: { url: `${process.env.OAUTH_SERVER_URL}/userinfo` },
-    clientId: AUTH_CUSTOM_ID,
-    clientSecret: AUTH_CUSTOM_SECRET,
-    issuer: AUTH_CUSTOM_URL,
+    clientId: env.AUTH_CUSTOM_ID,
+    clientSecret: env.AUTH_CUSTOM_SECRET,
+    issuer: env.AUTH_CUSTOM_URL,
     /**
      * If set to `true`, the user information will be extracted
      * from the `id_token` claims, instead of
@@ -137,8 +133,6 @@ if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET)
  */
 export const authConfig = {
   providers,
-
-  // providers,
   // providers: [
   //   GoogleProvider,
   // ],

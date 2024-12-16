@@ -13,6 +13,11 @@ export const env = createEnv({
         : z.string().optional(),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
+    AUTH_CUSTOM_CODENAME: z.string().optional(),
+    AUTH_CUSTOM_TITLE: z.string().optional(),
+    AUTH_CUSTOM_URL: z.string().optional(),
+    AUTH_CUSTOM_ID: z.string().optional(),
+    AUTH_CUSTOM_SECRET: z.string().optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -25,7 +30,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_APP_URL: z.string(),
   },
 
   /**
@@ -33,9 +38,15 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+    AUTH_CUSTOM_CODENAME: process.env.AUTH_CUSTOM_CODENAME,
+    AUTH_CUSTOM_TITLE: process.env.AUTH_CUSTOM_TITLE,
+    AUTH_CUSTOM_URL: process.env.AUTH_CUSTOM_URL,
+    AUTH_CUSTOM_ID: process.env.AUTH_CUSTOM_ID,
+    AUTH_CUSTOM_SECRET: process.env.AUTH_CUSTOM_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },
