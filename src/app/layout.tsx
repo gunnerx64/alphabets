@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-[calc(100vh-1px)] flex-col bg-brand-50 font-sans text-brand-950">
+      <body className="flex min-h-[calc(100vh-1px)] flex-col font-sans">
         <main className="relative flex flex-1 flex-col">
           <ThemeProvider
             attribute="class"
