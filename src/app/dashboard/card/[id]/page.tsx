@@ -1,21 +1,18 @@
 import { notFound, redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
 import { DashboardPage } from "@/components/dashboard-page";
 import { CardPageContent } from "./card-page-content";
 import { auth } from "@/server/auth";
-import { db } from "@/server/db";
-import { cards } from "@/server/db/schema";
 import { shortenFullName } from "@/lib/utils";
 import { getCard } from "@/server/api/routers/card";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string | string[] | undefined;
-  };
+  }>;
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { id } = params;
+  const { id } = await params;
   if (typeof id !== "string") return notFound();
 
   const session = await auth();
@@ -23,10 +20,6 @@ const Page = async ({ params }: PageProps) => {
   if (!session?.user || !session.user.id) {
     redirect("/signin");
   }
-
-  // if (!auth) {
-  //   return notFound()
-  // }
 
   const card = await getCard(id);
 

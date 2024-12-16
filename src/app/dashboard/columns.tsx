@@ -188,11 +188,12 @@ export const buildCardColumns = (
       return (
         <div className="flex flex-col items-center space-y-2">
           {/* Печать*/}
-          {!isGuest && (
+          {
             <TooltipBase title="Распечатать карточку">
               <Button
                 size="icon"
                 variant="outline"
+                disabled={isGuest}
                 aria-label={`Распечатать карточку ${lastname}`}
                 onClick={() =>
                   alert(
@@ -203,7 +204,7 @@ export const buildCardColumns = (
                 <PrinterIcon size={20} />
               </Button>
             </TooltipBase>
-          )}
+          }
           {/* Изменить, открывается в новой вкладке*/}
           {/* <TooltipBase title="Редактировать карточку">
               <Button size="icon" variant="outline">
@@ -217,31 +218,26 @@ export const buildCardColumns = (
               </Button>
             </TooltipBase> */}
           {/* Delete card */}
-          {isAdmin && (
+          {
             <AlertDialogBase
               title="Удаление карточки"
-              desc={
-                <div className="text-red-600">
-                  {addLineBreak(
-                    `Вы действительно хотите удалить карточку "${lastname}"?\nЭто действие отменить невозможно.`,
-                  )}
-                </div>
-              }
+              desc={addLineBreak(
+                `Вы действительно хотите удалить карточку "${lastname}"?\nЭто действие отменить невозможно.`,
+              )}
               confirmCallback={() => deleteMutation.mutate({ id: cardId })}
             >
               <Button
-                // key={`remove-${row.id}`}
                 size="icon"
                 variant="outline"
                 className="text-red-500 hover:text-red-700"
-                disabled={deleteMutation.isPending}
+                disabled={deleteMutation.isPending || !isAdmin}
               >
                 <TooltipBase title="Удалить карточку">
                   <XSquare size={20} />
                 </TooltipBase>
               </Button>
             </AlertDialogBase>
-          )}
+          }
         </div>
       );
     },

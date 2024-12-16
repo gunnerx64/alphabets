@@ -175,13 +175,9 @@ export const CardPageContent = ({ card }: CardPageContentProps) => {
             </Button>
             <AlertDialogBase
               title="Удаление карточки"
-              desc={
-                <div className="text-red-600">
-                  {addLineBreak(
-                    `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
-                  )}
-                </div>
-              }
+              desc={addLineBreak(
+                `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
+              )}
               confirmCallback={() => deleteMutation.mutate({ id: card.id })}
             >
               <Button
