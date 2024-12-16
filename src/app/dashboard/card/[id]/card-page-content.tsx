@@ -19,6 +19,7 @@ import { addLineBreak } from "@/lib/addLineBreak";
 import { shortenFullName } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { toast } from "@/hooks/use-toast";
+import { ImageZoom } from "@/components/image/image-zoom";
 
 interface DataElementProps {
   Icon?: React.ComponentType<{ className?: string }>;
@@ -64,13 +65,60 @@ export const CardPageContent = ({ card }: CardPageContentProps) => {
         <div className="absolute inset-px z-0 rounded-lg bg-white" />
         <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
         <div className="relative z-10 p-6">
-          <div className="mb-6 flex flex-col items-center gap-4">
+          <div className="mb-6 flex flex-col items-center gap-4 xl:flex-row-reverse xl:justify-between">
             {/* <div
               className="size-12 rounded-full"
               style={{
                 backgroundColor: "#f3f4f6",
               }}
             /> */}
+
+            <div className="mt-4 flex items-center justify-center gap-4 sm:justify-end">
+              <Button
+                variant="default"
+                size="sm"
+                aria-label={`Распечатать карточку ${card.lastname}`}
+                onClick={() =>
+                  alert(
+                    "TODO: после клика будет сгенерирован текстовый документ ИЛИ, если хватит ума, будет сгенерирован pdf и сразу отправлен на печать",
+                  )
+                }
+              >
+                <Printer className="mr-1 size-4" /> Печать
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="transition-colors hover:text-brand-600"
+                aria-label={`Редактировать карточку ${card.lastname}`}
+                onClick={() => console.log("ОТКРЫТЬ МОД. ОКНО РЕДАКТИРОВАНИЯ")}
+              >
+                <Edit className="mr-1 size-4" /> Изменить
+              </Button>
+              <AlertDialogBase
+                title="Удаление карточки"
+                desc={
+                  <div className="text-red-600">
+                    {addLineBreak(
+                      `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
+                    )}
+                  </div>
+                }
+                confirmCallback={() => deleteMutation.mutate({ id: card.id })}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 transition-colors hover:text-red-600"
+                  aria-label={`Удалить карточку ${fullName}`}
+                >
+                  {" "}
+                  <TooltipBase title="Удалить карточку">
+                    <Trash2 className="size-5" />
+                  </TooltipBase>
+                </Button>
+              </AlertDialogBase>
+            </div>
 
             <div className="flex flex-col items-center">
               <h3 className="text-lg/7 font-medium tracking-tight text-gray-950">
@@ -151,52 +199,8 @@ export const CardPageContent = ({ card }: CardPageContentProps) => {
               )}
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-center gap-4 sm:justify-end">
-            <Button
-              variant="default"
-              size="sm"
-              aria-label={`Распечатать карточку ${card.lastname}`}
-              onClick={() =>
-                alert(
-                  "TODO: после клика будет сгенерирован текстовый документ ИЛИ, если хватит ума, будет сгенерирован pdf и сразу отправлен на печать",
-                )
-              }
-            >
-              <Printer className="mr-1 size-4" /> Печать
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="transition-colors hover:text-brand-600"
-              aria-label={`Редактировать карточку ${card.lastname}`}
-              onClick={() => console.log("ОТКРЫТЬ МОД. ОКНО РЕДАКТИРОВАНИЯ")}
-            >
-              <Edit className="mr-1 size-4" /> Изменить
-            </Button>
-            <AlertDialogBase
-              title="Удаление карточки"
-              desc={
-                <div className="text-red-600">
-                  {addLineBreak(
-                    `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
-                  )}
-                </div>
-              }
-              confirmCallback={() => deleteMutation.mutate({ id: card.id })}
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-500 transition-colors hover:text-red-600"
-                aria-label={`Удалить карточку ${fullName}`}
-              >
-                {" "}
-                <TooltipBase title="Удалить карточку">
-                  <Trash2 className="size-5" />
-                </TooltipBase>
-              </Button>
-            </AlertDialogBase>
-          </div>
+
+          {card.scanUrl && <ImageZoom src={card.scanUrl} />}
         </div>
       </div>
     </>
