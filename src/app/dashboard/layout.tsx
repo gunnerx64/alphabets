@@ -1,4 +1,5 @@
 "use client";
+import { ThemeToggleButton } from "@/components/theme-toggle-button";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
@@ -47,10 +48,13 @@ const Sidebar = ({ onClose }: { onClose?: () => void }) => {
   const { data: session } = useSession();
   return (
     <div className="relative z-20 flex h-full flex-col space-y-4 md:space-y-6">
-      {/* logo */}
-      <p className="hidden text-lg/7 font-semibold text-brand-900 sm:block">
-        Ping<span className="text-brand-700">Panda</span>
-      </p>
+      <div className="flex items-center justify-between">
+        {/* logo */}
+        <p className="hidden text-lg/7 font-semibold text-brand-900 sm:block">
+          <span className="text-brand-700">Алфавитки</span>
+        </p>
+        <ThemeToggleButton />
+      </div>
 
       {/* navigation items */}
       <div className="flex-grow">

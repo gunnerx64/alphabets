@@ -5,6 +5,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { HydrateClient } from "@/trpc/server";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Алфавитки",
@@ -30,11 +31,18 @@ export default function RootLayout({
     >
       <body className="flex min-h-[calc(100vh-1px)] flex-col bg-brand-50 font-sans text-brand-950">
         <main className="relative flex flex-1 flex-col">
-          <SessionProvider>
-            <TRPCReactProvider>
-              <HydrateClient>{children}</HydrateClient>
-            </TRPCReactProvider>
-          </SessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            //disableTransitionOnChange
+          >
+            <SessionProvider>
+              <TRPCReactProvider>
+                <HydrateClient>{children}</HydrateClient>
+              </TRPCReactProvider>
+            </SessionProvider>
+          </ThemeProvider>
         </main>
       </body>
     </html>

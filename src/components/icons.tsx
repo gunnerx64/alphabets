@@ -1,4 +1,4 @@
-import { LucideProps } from "lucide-react"
+import { LucideProps } from "lucide-react";
 
 export const Icons = {
   discord: (props: LucideProps) => (
@@ -28,6 +28,6 @@ export const Icons = {
           fill="#1D9BF0"
         />
       </svg>
-    )
+    );
   },
-}
+};

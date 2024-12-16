@@ -4,6 +4,7 @@ import { Button, buttonVariants } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import { auth } from "@/server/auth";
 import { SignOutButton } from "./sign-out-button";
+import { ThemeToggleButton } from "./theme-toggle-button";
 
 export const Navbar = async () => {
   const session = await auth();
@@ -14,10 +15,11 @@ export const Navbar = async () => {
       <MaxWidthWrapper>
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="z-40 flex font-semibold">
-            АИС<span className="text-brand-700">Алфавитки</span>
+            <span className="text-xl/8 text-brand-700">Алфавитки</span>
           </Link>
 
           <div className="flex h-full items-center space-x-4">
+            <ThemeToggleButton />
             {user ? (
               <>
                 <SignOutButton />
