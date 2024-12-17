@@ -22,6 +22,8 @@ import { AlertDialogBase } from "./alert-dialog-base";
 import { addLineBreak } from "@/lib/addLineBreak";
 import { OptionItem } from "@/types";
 import { api } from "@/trpc/react";
+import { ImageCrop } from "./image/image-crop";
+import { ImageZoom } from "./image/image-zoom";
 
 // type CardUpsert = z.infer<typeof CardFormValidator>;
 
@@ -117,6 +119,7 @@ export const CardForm = ({
   } = cardForm;
   const cardFormRef = useRef(cardForm);
   const lastname = watch("lastname");
+  const scanUrl = watch("scanUrl");
   const exDate = watch("exclusionDate");
   console.log(exDate);
   // const birthdate_ru = watch("birthdate_ru");
@@ -190,6 +193,10 @@ export const CardForm = ({
         <CardContent className="space-y-4 pb-4">
           <FormProvider {...cardForm}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="flex w-full items-center">
+                {mode === "create" && <ImageCrop />}
+                {mode === "edit" && scanUrl && <ImageZoom src={scanUrl} />}
+              </div>
               <div className="grid w-full grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-4">
                 <FormTextField
                   name="lastname"
