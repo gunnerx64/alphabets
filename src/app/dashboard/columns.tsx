@@ -45,7 +45,9 @@ export const buildCardColumns = (
     // ),
     cell: (info) => {
       const fullName = `${info.row.original.lastname} ${info.row.original.firstname} ${info.row.original.middlename ?? ""}`;
-      const birthdate = info.row.original.birthdate.toLocaleDateString("ru-ru");
+      const birthdate = info.row.original.birthdate
+        ? new Date(info.row.original.birthdate).toLocaleDateString("ru-ru")
+        : null;
       const token = info.row.original.token;
       const rankComment = info.row.original.rankComment;
       const updatedBy = info.row.original.updatedBy?.name;

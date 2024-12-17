@@ -18,8 +18,13 @@ export const CardUpsertValidator: z.ZodType<CardInsert> = z.object({
   firstname: zod.string("Не указано имя"),
   middlename: z.string().optional(),
   token: z.string().optional(),
+  // birthdate: zod.stringDate().refine((value) => {
+  //   const year = value.getFullYear();
+  //   return MinAllowedBirthYear <= year && year <= MaxAllowedBirthYear;
+  // }, `Год рождения от ${MinAllowedBirthYear} до ${MaxAllowedBirthYear}`),
   birthdate: zod.stringDate().refine((value) => {
-    const year = value.getFullYear();
+    const date = new Date(value);
+    const year = date.getFullYear();
     return MinAllowedBirthYear <= year && year <= MaxAllowedBirthYear;
   }, `Год рождения от ${MinAllowedBirthYear} до ${MaxAllowedBirthYear}`),
   rankComment: z.string().optional(),
@@ -32,14 +37,11 @@ export const CardUpsertValidator: z.ZodType<CardInsert> = z.object({
     .min(1922, "Год поступления должен быть в диапазоне [1922:1991]")
     .max(1991, "Год поступления должен быть в диапазоне [1922:1991]"),
   graduateYear: z.coerce
-    .number({
-      required_error: "Не указан год поступления",
-      invalid_type_error: "Некорректный год",
-    })
+    .number({ invalid_type_error: "Некорректный год" })
     .min(1922, "Год выпуска должен быть в диапазоне [1922:1991]")
     .max(1991, "Год выпуска должен быть в диапазоне [1922:1991]")
-    .optional(),
-  exclusionDate: zod.stringDate().optional(),
+    .nullish(),
+  exclusionDate: zod.optionalStringDate(),
   exclusionComment: z.string().optional(),
   scanUrl: z.string({ required_error: "Не указана ссылка на скан" }),
   // createdAt: timestamp("created_at").defaultNow().notNull(),

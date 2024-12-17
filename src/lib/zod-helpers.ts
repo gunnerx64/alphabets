@@ -28,6 +28,23 @@ const russianDate = () =>
       return MinAllowedBirthYear <= year && year <= MaxAllowedBirthYear;
     }, `Допустимые года - ${MinAllowedBirthYear}-${MaxAllowedBirthYear} гг.`);
 
+const stringDate = () =>
+  z
+    .string({ required_error: "Укажите дату" })
+    .min(1, "Укажите дату")
+    .refine(
+      (value: string) => /^\d{4}\-\d{2}\-\d{2}$/.test(value) || value === "", // костыль
+      "Формат даты гггг-мм-дд",
+    )
+    .refine((value) => {
+      // костыль
+      if (value === "") return true;
+      const parsedDate = parse(value, "yyyy-MM-dd", new Date(), {
+        locale: ru,
+      });
+      return isValid(parsedDate);
+    }, "Недействительная дата");
+
 const zod = {
   /** Проверка строки на пустоту, игнорируя пробелы
    * @param msg сообщение (default: "Поле не может быть пустым.")
@@ -55,16 +72,21 @@ const zod = {
   russianDate,
   /** Необязательная дата в российском формате */
   optionalRussianDate: () => russianDate().optional(),
-  stringDate: () =>
-    z.preprocess(
-      (arg) => (arg === "" ? undefined : arg),
-      z.coerce.date({
-        errorMap: ({ code }, { defaultError }) => {
-          if (code == "invalid_date") return { message: "Некорректная дата" };
-          return { message: defaultError };
-        },
-      }),
-    ) as z.ZodEffects<z.ZodDate, Date, Date>,
+  // stringDate: () =>
+  //   z.preprocess(
+  //     (arg) => (arg === "" ? undefined : arg),
+  //     z.coerce.date({
+  //       errorMap: ({ code }, { defaultError }) => {
+  //         if (code == "invalid_date") return { message: "Некорректная дата" };
+  //         return { message: defaultError };
+  //       },
+  //     }),
+  //   ) as z.ZodEffects<z.ZodDate, Date, Date>,
+  stringDate,
+  optionalStringDate: () =>
+    stringDate()
+      .nullish()
+      .transform((x) => x ?? null),
 };
 
 export { zod };

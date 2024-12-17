@@ -38,14 +38,14 @@ export const cards = createTable(
     firstname: varchar("firstname", { length: 128 }).notNull(),
     middlename: varchar("middlename", { length: 128 }),
     token: varchar("token", { length: 32 }),
-    birthdate: date("birthdate", { mode: "date" }).notNull(),
+    birthdate: date("birthdate", { mode: "string" }).notNull(),
     rankComment: varchar("rank_comment", { length: 255 }),
     regionId: uuid("region_id")
       .notNull()
       .references(() => regions.id),
     admissionYear: integer("admission_year").notNull(),
     graduateYear: integer("graduate_year"),
-    exclusionDate: date("exclusion_date", { mode: "date" }),
+    exclusionDate: date("exclusion_date", { mode: "string" }),
     exclusionComment: varchar("exclusion_comment", { length: 255 }),
     scanUrl: varchar("scan_url", { length: 128 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -37,8 +37,8 @@ const cardFormDefaultValues = {
   rankComment: "",
   regionId: "",
   // admissionYear: "",
-  // graduateYear: "",
-  // exclusionDate: null,
+  graduateYear: undefined,
+  exclusionDate: "",
   exclusionComment: "",
   scanUrl: "etert",
 };
@@ -55,6 +55,7 @@ export const CardForm = ({
   editCard,
 }: CardFormProps) => {
   const router = useRouter();
+  const utils = api.useUtils();
   // const { mutate: upsertCard, isPending: isUpserting } =
   //   trpc.card.upsertCard.useMutation({
   //     onSuccess(data, variables, context) {
@@ -73,24 +74,29 @@ export const CardForm = ({
   //       });
   //     },
   //   });
-  const { mutate: upsertCard, isPending: isUpserting } =
-    api.card.upsertCard.useMutation({
-      onSuccess(data, variables, context) {
-        console.log("success: ", data);
-        toast({
-          title: `${mode === "create" ? "Создание" : "Редактирование"}`,
-          content: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
-        });
-        if (data) router.push(`/dashboard/card/${data.id}`);
-      },
-      onError(error) {
-        toast({
-          variant: "destructive",
-          title: "Ошибка",
-          content: "Произошла ошибка: " + error.message,
-        });
-      },
-    });
+  const {
+    mutate: upsertCard,
+    isSuccess,
+    isPending: isUpserting,
+  } = api.card.upsertCard.useMutation({
+    onSuccess(data, variables, context) {
+      console.log("success: ", data);
+      toast({
+        title: `${mode === "create" ? "Создание" : "Редактирование"}`,
+        content: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
+      });
+      utils.card.getCards.invalidate();
+      utils.card.getCardsCount.invalidate();
+      if (data) router.push(`/dashboard/card/${data.id}`);
+    },
+    onError(error) {
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        content: "Произошла ошибка: " + error.message,
+      });
+    },
+  });
 
   // const { data: regions } = trpc.region.getRegionOptions.useQuery();
   // const { data: regions } = useQuery({
@@ -100,8 +106,8 @@ export const CardForm = ({
 
   const cardForm = useZodForm({
     schema: CardUpsertValidator,
-    mode: "onSubmit",
-    // mode: "all",
+    // mode: "onSubmit",
+    mode: "all",
     defaultValues: editCard || cardFormDefaultValues,
   });
 
@@ -290,7 +296,7 @@ export const CardForm = ({
                 </AlertDialogBase>
                 <Button
                   className="w-[200px]"
-                  disabled={isUpserting}
+                  disabled={isUpserting || isSuccess}
                   type="submit"
                   // onClick={async () => {
                   //   console.log("SUBM CLICK");
