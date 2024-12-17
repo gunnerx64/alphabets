@@ -6,7 +6,6 @@ import { getRegionsOptions } from "@/server/api/routers/region";
 
 export default async function Page() {
   const regions = await getRegionsOptions();
-  console.log(regions);
   return (
     <DashboardPage title="Создание алфавитки">
       <Suspense fallback={<LoadingSpinner />}>

@@ -19,6 +19,7 @@ import { addLineBreak } from "@/lib/addLineBreak";
 import { shortenFullName } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { toast } from "@/hooks/use-toast";
+import Link from "next/link";
 import { ImageZoom } from "@/components/image/image-zoom";
 
 interface DataElementProps {
@@ -60,149 +61,195 @@ export const CardPageContent = ({ card }: CardPageContentProps) => {
   });
 
   return (
-    <>
-      <div className="group relative">
-        <div className="absolute inset-px z-0 rounded-lg bg-white" />
-        <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
-        <div className="relative z-10 p-6">
-          <div className="mb-6 flex flex-col items-center gap-4 xl:flex-row-reverse xl:justify-between">
-            {/* <div
+    <div className="group relative">
+      <div className="absolute inset-px z-0 rounded-lg bg-white" />
+      <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
+      <div className="relative z-10 p-6">
+        <div className="mb-6 flex flex-col items-center gap-4 xl:flex-row-reverse xl:justify-between">
+          {/* <div
               className="size-12 rounded-full"
               style={{
                 backgroundColor: "#f3f4f6",
               }}
             /> */}
 
-            <div className="mt-4 flex items-center justify-center gap-4 sm:justify-end">
-              <Button
-                variant="default"
-                size="sm"
-                aria-label={`Распечатать карточку ${card.lastname}`}
-                onClick={() =>
-                  alert(
-                    "TODO: после клика будет сгенерирован текстовый документ ИЛИ, если хватит ума, будет сгенерирован pdf и сразу отправлен на печать",
-                  )
-                }
-              >
-                <Printer className="mr-1 size-4" /> Печать
-              </Button>
+          <div className="mt-4 flex items-center justify-center gap-4 sm:justify-end">
+            <Button
+              variant="default"
+              size="sm"
+              aria-label={`Распечатать карточку ${card.lastname}`}
+              onClick={() =>
+                alert(
+                  "TODO: после клика будет сгенерирован текстовый документ ИЛИ, если хватит ума, будет сгенерирован pdf и сразу отправлен на печать",
+                )
+              }
+            >
+              <Printer className="mr-1 size-4" /> Печать
+            </Button>
+            <Link href={`/dashboard/card/${card.id}/edit`}>
               <Button
                 variant="outline"
                 size="sm"
                 className="transition-colors hover:text-brand-600"
                 aria-label={`Редактировать карточку ${card.lastname}`}
-                onClick={() => console.log("ОТКРЫТЬ МОД. ОКНО РЕДАКТИРОВАНИЯ")}
               >
                 <Edit className="mr-1 size-4" /> Изменить
               </Button>
-              <AlertDialogBase
-                title="Удаление карточки"
-                desc={
-                  <div className="text-red-600">
-                    {addLineBreak(
-                      `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
-                    )}
-                  </div>
-                }
-                confirmCallback={() => deleteMutation.mutate({ id: card.id })}
+            </Link>
+            <AlertDialogBase
+              title="Удаление карточки"
+              desc={
+                <div className="text-red-600">
+                  {addLineBreak(
+                    `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
+                  )}
+                </div>
+              }
+              confirmCallback={() => deleteMutation.mutate({ id: card.id })}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 transition-colors hover:text-red-600"
+                aria-label={`Удалить карточку ${fullName}`}
               >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 transition-colors hover:text-red-600"
-                  aria-label={`Удалить карточку ${fullName}`}
-                >
-                  {" "}
-                  <TooltipBase title="Удалить карточку">
-                    <Trash2 className="size-5" />
-                  </TooltipBase>
-                </Button>
-              </AlertDialogBase>
-            </div>
-
-            <div className="flex flex-col items-center">
-              <h3 className="text-lg/7 font-medium tracking-tight text-gray-950">
-                {"📂"} {card.lastname} {card.firstname} {card.middlename ?? ""}
-              </h3>
-              <p className="text-base/6 text-gray-600">
-                {format(card.birthdate, "д.р. dd MMMM yyyy г.", { locale: ru })}
-              </p>
-            </div>
+                {" "}
+                <TooltipBase title="Удалить карточку">
+                  <Trash2 className="size-5" />
+                </TooltipBase>
+              </Button>
+            </AlertDialogBase>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2">
-            <div className="mb-6 space-y-3">
-              <DataElement
-                Icon={Clock}
-                title="Личный номер"
-                content={card.token ?? "нет данных"}
-              />
-              <DataElement
-                Icon={User2}
-                title="В.звание"
-                content={card.rankComment ?? "нет данных"}
-              />
-              <DataElement
-                Icon={Scan}
-                title="Оригинал"
-                content={"TODO: Превью фото скана"}
-              />
-              {card.createdBy && (
-                <DataElement
-                  Icon={Database}
-                  title="Оцифровал"
-                  content={`${card.createdBy.name} (${card.createdAt.toLocaleDateString("ru-ru")} г.)`}
-                />
-              )}
-              {card.updatedAt && card.updatedBy && (
-                <DataElement
-                  Icon={Clock}
-                  title="Редактировал"
-                  content={`${card.updatedBy.name} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
-                />
-              )}
-            </div>
-
-            <div className="mb-6 space-y-3">
-              <DataElement
-                Icon={Clock}
-                title="Откуда прибыл"
-                content={card.region?.title ?? "нет данных"}
-              />
-              <DataElement
-                Icon={Clock}
-                title="Год поступления"
-                content={`${card.admissionYear}`}
-              />
-              {(card.graduateYear ||
-                (!card.graduateYear && !card.exclusionDate)) && (
-                <DataElement
-                  Icon={Clock}
-                  title="Год выпуска"
-                  content={`${card.graduateYear ?? "нет данных"}`}
-                />
-              )}
-              {(card.exclusionDate ||
-                (!card.graduateYear && !card.exclusionDate)) && (
-                <>
-                  <DataElement
-                    Icon={Clock}
-                    title="Дата исключения"
-                    content={`${card.exclusionDate ? new Date(card.exclusionDate).toLocaleDateString("ru-ru") + " г." : "нет данных"}`}
-                  />
-                  <DataElement
-                    Icon={Clock}
-                    title="Причина исключения"
-                    content={`${card.exclusionComment ?? "нет данных"}`}
-                  />
-                </>
-              )}
-            </div>
+          <div className="mt-4 flex items-center justify-center gap-4 sm:justify-end">
+            <Button
+              variant="default"
+              size="sm"
+              aria-label={`Распечатать карточку ${card.lastname}`}
+              onClick={() =>
+                alert(
+                  "TODO: после клика будет сгенерирован текстовый документ ИЛИ, если хватит ума, будет сгенерирован pdf и сразу отправлен на печать",
+                )
+              }
+            >
+              <Printer className="mr-1 size-4" /> Печать
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="transition-colors hover:text-brand-600"
+              aria-label={`Редактировать карточку ${card.lastname}`}
+              onClick={() => console.log("ОТКРЫТЬ МОД. ОКНО РЕДАКТИРОВАНИЯ")}
+            >
+              <Edit className="mr-1 size-4" /> Изменить
+            </Button>
+            <AlertDialogBase
+              title="Удаление карточки"
+              desc={
+                <div className="text-red-600">
+                  {addLineBreak(
+                    `Вы действительно хотите удалить карточку "${fullName}"?\nЭто действие отменить невозможно.`,
+                  )}
+                </div>
+              }
+              confirmCallback={() => deleteMutation.mutate({ id: card.id })}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 transition-colors hover:text-red-600"
+                aria-label={`Удалить карточку ${fullName}`}
+              >
+                {" "}
+                <TooltipBase title="Удалить карточку">
+                  <Trash2 className="size-5" />
+                </TooltipBase>
+              </Button>
+            </AlertDialogBase>
           </div>
 
-          {card.scanUrl && <ImageZoom src={card.scanUrl} />}
+          <div className="flex flex-col items-center">
+            <h3 className="text-lg/7 font-medium tracking-tight text-gray-950">
+              {"📂"} {card.lastname} {card.firstname} {card.middlename ?? ""}
+            </h3>
+            <p className="text-base/6 text-gray-600">
+              {format(card.birthdate, "д.р. dd MMMM yyyy г.", { locale: ru })}
+            </p>
+          </div>
         </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2">
+          <div className="mb-6 space-y-3">
+            <DataElement
+              Icon={Clock}
+              title="Личный номер"
+              content={card.token ?? "нет данных"}
+            />
+            <DataElement
+              Icon={User2}
+              title="В.звание"
+              content={card.rankComment ?? "нет данных"}
+            />
+            <DataElement
+              Icon={Scan}
+              title="Оригинал"
+              content={"TODO: Превью фото скана"}
+            />
+            {card.createdBy && (
+              <DataElement
+                Icon={Database}
+                title="Оцифровал"
+                content={`${card.createdBy.name} (${card.createdAt.toLocaleDateString("ru-ru")} г.)`}
+              />
+            )}
+            {card.updatedAt && card.updatedBy && (
+              <DataElement
+                Icon={Clock}
+                title="Редактировал"
+                content={`${card.updatedBy.name} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
+              />
+            )}
+          </div>
+
+          <div className="mb-6 space-y-3">
+            <DataElement
+              Icon={Clock}
+              title="Откуда прибыл"
+              content={card.region?.title ?? "нет данных"}
+            />
+            <DataElement
+              Icon={Clock}
+              title="Год поступления"
+              content={`${card.admissionYear}`}
+            />
+            {(card.graduateYear ||
+              (!card.graduateYear && !card.exclusionDate)) && (
+              <DataElement
+                Icon={Clock}
+                title="Год выпуска"
+                content={`${card.graduateYear ?? "нет данных"}`}
+              />
+            )}
+            {(card.exclusionDate ||
+              (!card.graduateYear && !card.exclusionDate)) && (
+              <>
+                <DataElement
+                  Icon={Clock}
+                  title="Дата исключения"
+                  content={`${card.exclusionDate ? new Date(card.exclusionDate).toLocaleDateString("ru-ru") + " г." : "нет данных"}`}
+                />
+                <DataElement
+                  Icon={Clock}
+                  title="Причина исключения"
+                  content={`${card.exclusionComment ?? "нет данных"}`}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        {card.scanUrl && <ImageZoom src={card.scanUrl} />}
       </div>
-    </>
+    </div>
   );
 };
