@@ -9,8 +9,10 @@ import Image from "next/image";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Icons } from "@/components/icons";
+import { env } from "@/env";
 
 const Page = () => {
+  const customServerName = env.AUTH_CUSTOM_TITLE;
   const codeSnippet = `await fetch("http://localhost:3000/api/v1/events", {
   method: "POST",
   body: JSON.stringify({
@@ -33,28 +35,28 @@ const Page = () => {
           <div className="relative mx-auto flex flex-col items-center gap-10 text-center">
             <div>
               <Heading>
-                <span>Real-Time SaaS Insights,</span>
-                <br />
+                <span>Поиск архивных алфавиток</span>
+                <br className="my-1" />
                 <span className="relative bg-gradient-to-r from-brand-600 to-brand-800 bg-clip-text text-transparent dark:from-brand-500 dark:to-brand-700">
-                  Delivered to Your Discord
+                  прямо в Вашем веб-браузере
                 </span>
               </Heading>
             </div>
 
             <p className="max-w-prose text-pretty text-center text-base/7 text-zinc-700 dark:text-white/80">
-              PingPanda is the easiest way to monitor your SaaS. Get instant
-              notifications for{" "}
+              Проект Алфавитки предназначен для{" "}
               <span className="font-semibold">
-                sales, new users, or any other event
+                оцифровки, хранения, поиска и печати
               </span>{" "}
-              sent directly to your Discord.
+              архивных алфавиток.
             </p>
 
             <ul className="flex flex-col items-start space-y-2 text-left text-base/7 text-zinc-700 dark:text-white/80">
               {[
-                "Real-time Discord alerts for critical events",
-                "Buy once, use forever",
-                "Track sales, new users, or any other event",
+                "Оцифровка архивных алфавиток",
+                "Фильтр и сортировка алфавиток, хранящихся в базе данных",
+                "Сохранение скана оригинала алфавитки",
+                "Экспорт и печать алфавиток в формализованном формате",
               ].map((item, index) => (
                 <li key={index} className="flex items-center gap-1.5 text-left">
                   <Check className="size-5 shrink-0 text-brand-700" />
@@ -65,10 +67,10 @@ const Page = () => {
 
             <div className="w-full max-w-80">
               <ShinyButton
-                href="/sign-up"
+                href="/dashboard"
                 className="relative z-10 h-14 w-full text-base shadow-lg transition-shadow duration-300 hover:shadow-xl"
               >
-                Start For Free Today
+                Начать пользоваться
               </ShinyButton>
             </div>
           </div>
@@ -133,9 +135,11 @@ const Page = () => {
         <MaxWidthWrapper className="flex flex-col items-center gap-16 sm:gap-20">
           <div>
             <h2 className="text-center text-base/7 font-semibold text-brand-600">
-              Intuitive Monitoring
+              Интуитивный интерфейс веб-приложения
             </h2>
-            <Heading>Stay ahead with real-time insights</Heading>
+            <Heading className="text-center">
+              Панель управления базой данных алфавиток
+            </Heading>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3 lg:grid-rows-2">
@@ -146,11 +150,12 @@ const Page = () => {
               <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] lg:rounded-l-[calc(2rem+1px)]">
                 <div className="px-8 pb-3 pt-8 sm:px-10 sm:pb-0 sm:pt-10">
                   <p className="mt-2 text-lg/7 font-medium tracking-tight max-lg:text-center">
-                    Real-time notifications
+                    Таблица поиска
                   </p>
                   <p className="mt-2 max-w-lg text-sm/6 text-foreground/70 max-lg:text-center">
-                    Get notified about critical events the moment they happen,
-                    no matter if you're at home or on the go.
+                    В таблице в компактном виде отображены все заполненные
+                    сведения об алфавитке, также доступны действия
+                    редактирования, печати и удаления.
                   </p>
                 </div>
 
@@ -175,11 +180,10 @@ const Page = () => {
               <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] max-lg:rounded-t-[calc(2rem+1px)]">
                 <div className="px-8 pt-8 sm:px-10 sm:pt-10">
                   <p className="mt-2 text-lg/7 font-medium tracking-tight max-lg:text-center">
-                    Track Any Event
+                    Упрощенная авторизация
                   </p>
                   <p className="mt-2 max-w-lg text-sm/6 text-foreground/70 max-lg:text-center">
-                    From new user signups to successful payments, PingPanda
-                    notifies you for all critical events in your SaaS.
+                    В систему можно войти через OAuth сервис {customServerName}.
                   </p>
                 </div>
                 <div className="flex flex-1 items-center justify-center px-8 max-lg:pb-12 max-lg:pt-10 sm:px-10 lg:pb-2">
@@ -202,11 +206,11 @@ const Page = () => {
               <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)]">
                 <div className="px-8 pt-8 sm:px-10 sm:pt-10">
                   <p className="tracking-tightmax-lg:text-center mt-2 text-lg/7 font-medium">
-                    Track Any Properties
+                    Администрирование
                   </p>
                   <p className="mt-2 max-w-lg text-sm/6 text-foreground/70 max-lg:text-center">
-                    Add any custom data you like to an event, such as a user
-                    email, a purchase amount or an exceeded quota.
+                    Позволяет управлять пользователями и их правами,
+                    редактировать список регионов.
                   </p>
                 </div>
 
@@ -231,11 +235,12 @@ const Page = () => {
               <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] max-lg:rounded-b-[calc(2rem+1px)] lg:rounded-r-[calc(2rem+1px)]">
                 <div className="px-8 pb-3 pt-8 sm:px-10 sm:pb-0 sm:pt-10">
                   <p className="tracking-tightmax-lg:text-center mt-2 text-lg/7 font-medium">
-                    Easy Integration
+                    Экспорт и печать
                   </p>
                   <p className="mt-2 max-w-lg text-sm/6 text-foreground/70 max-lg:text-center">
-                    Connect PingPanda with your existing workflows in minutes
-                    and call our intuitive logging API from any language.
+                    Печать и экспорт алфавитки в формализованном виде доступны
+                    после заполнения всех необходимых полей на странице
+                    редактирования.
                   </p>
                 </div>
 
@@ -284,9 +289,11 @@ const Page = () => {
         <MaxWidthWrapper className="flex flex-col items-center gap-16 sm:gap-20">
           <div>
             <h2 className="text-center text-base/7 font-semibold text-brand-600">
-              Real-World Experiences
+              Опыт использования
             </h2>
-            <Heading className="text-center">What our customers say</Heading>
+            <Heading className="text-center">
+              Что говорят пользователи системы
+            </Heading>
           </div>
 
           <div className="mx-auto grid max-w-2xl grid-cols-1 divide-y divide-gray-200 px-4 dark:divide-slate-600 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:divide-x lg:divide-y-0">
@@ -301,9 +308,11 @@ const Page = () => {
               </div>
 
               <p className="text-pretty text-center text-base font-medium tracking-tight text-foreground/90 sm:text-lg lg:text-left lg:text-lg/8">
-                PingPanda has been a game-changer for me. I've been using it for
-                two months now and seeing sales pop up in real-time is super
-                satisfying.
+                До внедрения проекта Алфавитки я тратила до двух часов рабочего
+                времени на поиск алфавиток в архиве и заполнение формы в формате
+                .doc ☹️. Теперь процесс поиска и печати алфавиток занимает около
+                минуты, сэкономленное время могу посвятить своему профилю в
+                инстаграме 🤩.
               </p>
 
               <div className="mt-2 flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-start lg:justify-start">
@@ -316,7 +325,7 @@ const Page = () => {
                 />
                 <div className="flex flex-col items-center sm:items-start">
                   <p className="flex items-center font-semibold">
-                    Freya Larsson
+                    Светлана М.
                     <Icons.verificationBadge className="ml-1.5 inline-block size-4" />
                   </p>
                   <p className="text-sm text-gray-600">@itsfreya</p>
@@ -335,9 +344,11 @@ const Page = () => {
               </div>
 
               <p className="text-pretty text-center text-base font-medium tracking-tight text-foreground/90 sm:text-lg lg:text-left lg:text-lg/8">
-                PingPanda's been paying off for our SaaS. Nice to have simple
-                way to see how we're doing day-to-day. Definitely makes our
-                lives easier.
+                Внедрение проекта Алфавитки позволило оцифровать архив старых
+                алфавиток. Теперь у меня появилось свободное время, чтобы в
+                опустевшем коридоре, в котором хранился архив, сыграть в
+                мини-гольф 🏑. Особая благодарность программистам за разработку
+                такой чудесной программы 🚀.
               </p>
 
               <div className="mt-2 flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-start lg:justify-start">
@@ -350,7 +361,7 @@ const Page = () => {
                 />
                 <div className="flex flex-col items-center sm:items-start">
                   <p className="flex items-center font-semibold">
-                    Kai Durant
+                    Евгений Б.
                     <Icons.verificationBadge className="ml-1.5 inline-block size-4" />
                   </p>
                   <p className="text-sm text-gray-600">@kdurant_</p>
@@ -360,10 +371,10 @@ const Page = () => {
           </div>
 
           <ShinyButton
-            href="/sign-up"
+            href="/dashboard"
             className="relative z-10 h-14 w-full max-w-xs text-base shadow-lg transition-shadow duration-300 hover:shadow-xl"
           >
-            Start For Free Today
+            Панель управления
           </ShinyButton>
         </MaxWidthWrapper>
       </section>
