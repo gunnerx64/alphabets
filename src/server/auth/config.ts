@@ -113,7 +113,7 @@ if (
     },
   });
 
-if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET)
+if (env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET)
   providers.push(
     GoogleProvider({
       authorization: {
