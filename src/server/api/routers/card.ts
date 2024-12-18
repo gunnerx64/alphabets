@@ -93,8 +93,17 @@ export const cardRouter = createTRPCRouter({
       console.log(
         input.id ? `updating card ${input.id}...` : "creating new card...",
       );
+      // const parsedBirthdate = parse(input.birthdate, "yyyy-MM-dd", new Date(), {
+      //   locale: ru,
+      // });
+      // return isValid(parsedDate);
+      const exclusionDate = input.exclusionDate ?? null;
+      const graduateYear = input.graduateYear ?? null;
+
       const values: CardInsert = {
         ...input,
+        exclusionDate,
+        graduateYear,
         // if card is created set createdById to current user
         createdById: input.id ? input.createdById : ctx.session.user.id,
         // if card is updated set updatedById to current user

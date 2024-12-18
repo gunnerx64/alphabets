@@ -31,7 +31,7 @@ const russianDate = () =>
 const stringDate = () =>
   z
     .string({ required_error: "Укажите дату" })
-    .min(1, "Укажите дату")
+    // .min(1, "Укажите дату")
     .refine(
       (value: string) => /^\d{4}\-\d{2}\-\d{2}$/.test(value) || value === "", // костыль
       "Формат даты гггг-мм-дд",
@@ -85,7 +85,8 @@ const zod = {
   stringDate,
   optionalStringDate: () =>
     stringDate()
-      .nullish()
+      .optional()
+      .nullable()
       .transform((x) => x ?? null),
 };
 
