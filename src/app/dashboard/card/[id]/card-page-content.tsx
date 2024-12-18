@@ -28,7 +28,7 @@ interface DataElementProps {
   content: string;
 }
 const DataElement = ({ title, content: value, Icon }: DataElementProps) => (
-  <div className="flex items-center text-base/5 font-medium text-gray-600">
+  <div className="flex items-center text-base/5 font-medium">
     {Icon && <Icon className="mr-2 size-4 text-brand-500" />}
     <span className="text-sm/5">{title}:</span>
     <span className="ml-1 font-semibold">{value}</span>
@@ -63,9 +63,9 @@ export const CardPageContent = ({ card, storageUrl }: CardPageContentProps) => {
 
   return (
     <div className="group relative">
-      <div className="absolute inset-px z-0 rounded-lg bg-white" />
+      <div className="absolute inset-px z-0 rounded-lg bg-white dark:bg-slate-700" />
       <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
-      <div className="relative z-10 p-6">
+      <div className="relative z-10 p-6 text-foreground/90">
         <div className="mb-6 flex flex-col items-center gap-4 xl:flex-row-reverse xl:justify-between">
           {/* <div
               className="size-12 rounded-full"
@@ -118,17 +118,21 @@ export const CardPageContent = ({ card, storageUrl }: CardPageContentProps) => {
           </div>
 
           <div className="flex flex-col items-center">
-            <h3 className="text-lg/7 font-medium tracking-tight text-gray-950">
-              {"📂"} {card.lastname} {card.firstname} {card.middlename ?? ""}
+            <h3 className="text-3xl font-medium tracking-tight">
+              {card.lastname} {card.firstname} {card.middlename ?? ""}
             </h3>
-            <p className="text-base/6 text-gray-600">
-              {format(card.birthdate, "д.р. dd MMMM yyyy г.", { locale: ru })}
-            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2">
           <div className="mb-6 space-y-3">
+            <DataElement
+              Icon={Clock}
+              title="Дата рождения"
+              content={format(card.birthdate, "d MMMM yyyy г.", {
+                locale: ru,
+              })}
+            />
             <DataElement
               Icon={Clock}
               title="Личный номер"

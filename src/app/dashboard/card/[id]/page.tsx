@@ -28,7 +28,7 @@ const Page = async ({ params }: PageProps) => {
 
   return (
     <DashboardPage
-      title={shortenFullName(card.lastname, card.firstname, card.middlename)}
+      title={`Просмотр алфавитки «${shortenFullName(card.lastname, card.firstname, card.middlename)}»`}
     >
       <CardPageContent card={card} storageUrl={storageUrlPrefix()} />
     </DashboardPage>
