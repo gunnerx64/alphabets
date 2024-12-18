@@ -256,13 +256,14 @@ export const CardForm = ({
                     errorMessage={errors.scanUrl?.message}
                   />
                 )}
-                {mode === "edit" && scanUrl && storageUrl ? (
-                  <ImageZoom src={storageUrl + scanUrl} />
-                ) : (
-                  <p className="text-red-400">
-                    Не удалось отобразить скан оригинала
-                  </p>
-                )}
+                {mode === "edit" &&
+                  (scanUrl && storageUrl ? (
+                    <ImageZoom src={storageUrl + scanUrl} />
+                  ) : (
+                    <p className="text-red-400">
+                      Не удалось отобразить скан оригинала
+                    </p>
+                  ))}
               </div>
 
               <div className="grid w-full grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-4">
