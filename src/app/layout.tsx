@@ -6,6 +6,7 @@ import { HydrateClient } from "@/trpc/server";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Алфавитки",
@@ -27,7 +28,7 @@ export default function RootLayout({
     <html
       lang="ru"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
-      suppressHydrationWarning
+      //suppressHydrationWarning
     >
       <body className="flex min-h-[calc(100vh-1px)] flex-col font-sans">
         <main className="relative flex flex-1 flex-col">
@@ -43,6 +44,7 @@ export default function RootLayout({
               </TRPCReactProvider>
             </SessionProvider>
           </ThemeProvider>
+          <Toaster />
         </main>
       </body>
     </html>
