@@ -41,7 +41,7 @@ const mainItems = [
 const statItems = [
   {
     title: "Новые алфавитки",
-    url: pathPrefix + "/stats-create",
+    url: pathPrefix + "/stats-creation",
     icon: Calendar,
   },
 ];
