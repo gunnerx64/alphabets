@@ -131,3 +131,13 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+export const userProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (["user", "admin"].includes(ctx.session.user.role)) {
+    return next();
+    return next({
+      ctx: { session: ctx.session },
+    });
+  }
+  throw new TRPCError({ code: "FORBIDDEN" });
+});
