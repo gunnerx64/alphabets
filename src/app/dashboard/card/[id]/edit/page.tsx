@@ -5,6 +5,7 @@ import { LoadingSpinner } from "@/components/loading-spinner";
 import { getRegionsOptions } from "@/server/api/routers/region";
 import { getCard } from "@/server/api/routers/card";
 import { notFound } from "next/navigation";
+import { storageUrlPrefix } from "@/server/utils";
 
 export default async function Page({
   params,
@@ -20,7 +21,12 @@ export default async function Page({
   return (
     <DashboardPage title="Редактирование алфавитки">
       <Suspense fallback={<LoadingSpinner />}>
-        <CardForm mode="edit" editCard={editCard} regions={regions} />
+        <CardForm
+          mode="edit"
+          editCard={editCard}
+          regions={regions}
+          storageUrl={storageUrlPrefix()}
+        />
       </Suspense>
     </DashboardPage>
   );

@@ -5,6 +5,14 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = { reactStrictMode: true, transpilePackages: ["geist"] };
+const config = {
+  reactStrictMode: true,
+  transpilePackages: ["geist"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
+  },
+};
 
 export default config;

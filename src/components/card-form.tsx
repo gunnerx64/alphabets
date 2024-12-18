@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { Button } from "./ui/button";
 import { CardInsert } from "@/server/db/schema";
@@ -24,6 +24,8 @@ import { OptionItem } from "@/types";
 import { api } from "@/trpc/react";
 import { ImageCrop } from "./image/image-crop";
 import { ImageZoom } from "./image/image-zoom";
+import { shortenFullName } from "@/lib/utils";
+import { uploadScan } from "@/server/actions";
 
 // type CardUpsert = z.infer<typeof CardFormValidator>;
 
@@ -37,53 +39,51 @@ const cardFormDefaultValues = {
   rankComment: "",
   regionId: "",
   // admissionYear: "",
-  graduateYear: undefined,
-  exclusionDate: "",
+  graduateYear: null,
+  exclusionDate: null,
   exclusionComment: "",
-  scanUrl: "etert",
+  scanUrl: "",
 };
 
 interface CardFormProps {
   mode?: "create" | "edit";
   regions: OptionItem[];
   editCard?: CardInsert;
+  storageUrl?: string;
 }
+
+const errorToast = (errors: object) => {
+  toast({
+    variant: "destructive",
+    title: "Не заполнены обязательные поля",
+    description: (
+      <div className="flex max-h-72 w-full flex-col items-start space-y-0 overflow-y-auto">
+        {Object.keys(errors).map((key, index) => (
+          <div key={index}>{`${key}: ${Object.values(errors)[index]}`}</div>
+        ))}
+      </div>
+    ),
+  });
+};
 
 export const CardForm = ({
   mode = "create",
   regions,
   editCard,
+  storageUrl,
 }: CardFormProps) => {
   const router = useRouter();
   const utils = api.useUtils();
-  // const { mutate: upsertCard, isPending: isUpserting } =
-  //   trpc.card.upsertCard.useMutation({
-  //     onSuccess(data, variables, context) {
-  //       console.log("success: ", data);
-  //       toast({
-  //         title: `${mode === "create" ? "Создание" : "Редактирование"}`,
-  //         content: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
-  //       });
-  //       if (data) router.push(`/dashboard/card/${data.id}`);
-  //     },
-  //     onError(error) {
-  //       toast({
-  //         variant: "destructive",
-  //         title: "Ошибка",
-  //         content: "Произошла ошибка: " + error.message,
-  //       });
-  //     },
-  //   });
+  const [scanBlob, setScanBlob] = useState<Blob | null>(null);
   const {
     mutate: upsertCard,
     isSuccess,
     isPending: isUpserting,
   } = api.card.upsertCard.useMutation({
-    onSuccess(data, variables, context) {
-      console.log("success: ", data);
+    onSuccess(data) {
       toast({
         title: `${mode === "create" ? "Создание" : "Редактирование"}`,
-        content: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
+        description: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
       });
       utils.card.getCards.invalidate();
       utils.card.getCardsCount.invalidate();
@@ -93,15 +93,51 @@ export const CardForm = ({
       toast({
         variant: "destructive",
         title: "Ошибка",
-        content: "Произошла ошибка: " + error.message,
+        description: "Произошла ошибка: " + error.message,
       });
     },
   });
 
-  // const { data: regions } = trpc.region.getRegionOptions.useQuery();
-  // const { data: regions } = useQuery({
-  //   queryKey: ["region-options"],
-  //   queryFn: async () => getRegionOptionsAction,
+  // const {
+  //   mutate: uploadScan_Server,
+  //   isSuccess: isScanUploaded,
+  //   isPending: isUploading,
+  // } = useMutation({
+  //   mutationKey: ["upload-scan"],
+  //   mutationFn: uploadScan,
+  //   // async (scanBase64: string, scanTitle: string): Promise<GenericResponse<string>>=>{
+  //   // 'use server'
+  //   // const formData = new FormData();
+  //   // formData.set("scan", scanBase64)
+  //   // formData.set("scanTitle", scanTitle)
+  //   // const res = await fetch('/api/upload',{
+  //   //   method:"POST",
+  //   //   body:
+
+  //   // })
+  //   // const data = await res.json()
+  //   // },
+  //   onSuccess(data) {
+  //     if (!data.success) {
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Ошибка",
+  //         description: `Не удалось загрузить скан на сервер (${data.message})`,
+  //       });
+  //     }
+  //     toast({
+  //       title: `${mode === "create" ? "Создание" : "Редактирование"}`,
+  //       description: `${mode === "create" ? "Алфавитка создана" : "Алфавитка изменена"}`,
+  //     });
+  //   },
+  //   onError(error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Ошибка",
+  //       description:
+  //         "Произошла ошибка при загрузке скана на сервер: " + error.message,
+  //     });
+  //   },
   // });
 
   const cardForm = useZodForm({
@@ -111,46 +147,51 @@ export const CardForm = ({
     defaultValues: editCard || cardFormDefaultValues,
   });
 
-  // const cardForm = useForm<CardInsert>({
-  //   resolver: zodResolver(CardCreateOrUpdateValidator),
-  // });
-
   const {
     handleSubmit,
     watch,
     setValue,
     clearErrors: clearFormErrors,
     trigger: validateForm,
-    formState: { errors, isDirty: isFormDirty },
+    formState: { errors, isDirty: isFormDirty, isValid: isFormValid },
   } = cardForm;
   const cardFormRef = useRef(cardForm);
   const lastname = watch("lastname");
+  const firstname = watch("firstname");
+  const middlename = watch("middlename");
   const scanUrl = watch("scanUrl");
-  const exDate = watch("exclusionDate");
-  console.log(exDate);
-  // const birthdate_ru = watch("birthdate_ru");
 
-  console.log(errors);
+  // console.log(errors);
+
+  useEffect(() => {
+    (async () => {
+      await validateForm();
+    })();
+  }, []);
 
   // original state came from server
   const cardFormInitialState = useMemo(() => cardForm.getValues(), []);
 
-  const onSubmit = (data: CardInsert) => {
-    // data.birthdate = data.birthdate_ru
-    //   ? parse(data.birthdate_ru, "dd.MM.yyyy", new Date(), { locale: ru })
-    //   : null;
-    console.log("submitting... ", data);
-    upsertCard(data);
-  };
+  const onSubmit = async (data: CardInsert) => {
+    if (mode === "edit") {
+      upsertCard(data);
+      return;
+    }
+    const formData = new FormData();
+    formData.append("scan", scanBlob as Blob);
 
-  // watch for birthdate_ru changes and updates birthdate
-  // useEffect(() => {
-  //   if (birthdate_ru)
-  //     setValue(
-  //       "birthdate",
-  //       parse(birthdate_ru, "dd.MM.yyyy", new Date(), { locale: ru }),
-  //     );
-  // }, [birthdate_ru]);
+    const res = await uploadScan(formData);
+    if (res.success) {
+      data.scanUrl = res.payload as string;
+      upsertCard(data);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: `Не удалось загрузить скан на сервер (${res.message})`,
+      });
+    }
+  };
 
   const buttonCaption = useMemo(
     () =>
@@ -187,9 +228,8 @@ export const CardForm = ({
         <CardHeader>
           <CardTitle className="text-2xl font-medium">
             {"Форма " +
-              (mode === "create"
-                ? "создания алфавитки"
-                : `редактирования алфавитки ${lastname}`)}
+              (mode === "create" ? "создания" : "редактирования") +
+              ` алфавитки ${shortenFullName(lastname, firstname, middlename)}`}
           </CardTitle>
           <CardDescription className="text-base">
             Внесите в форму необходимые поля. Для печати возможно потребуется
@@ -200,9 +240,31 @@ export const CardForm = ({
           <FormProvider {...cardForm}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex w-full items-center">
-                {mode === "create" && <ImageCrop />}
-                {mode === "edit" && scanUrl && <ImageZoom src={scanUrl} />}
+                {mode === "create" && (
+                  <ImageCrop
+                    onCropped={async (blob: Blob | null) => {
+                      if (!blob) {
+                        setValue("scanUrl", "");
+                        setScanBlob(null);
+                      } else {
+                        setScanBlob(blob);
+                        // const base64 = await blobToBase64(blob);
+                        // setValue("scanUrl", base64, { shouldValidate: true });
+                        setValue("scanUrl", "set", { shouldValidate: true });
+                      }
+                    }}
+                    errorMessage={errors.scanUrl?.message}
+                  />
+                )}
+                {mode === "edit" && scanUrl && storageUrl ? (
+                  <ImageZoom src={storageUrl + scanUrl} />
+                ) : (
+                  <p className="text-red-400">
+                    Не удалось отобразить скан оригинала
+                  </p>
+                )}
               </div>
+
               <div className="grid w-full grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-4">
                 <FormTextField
                   name="lastname"
@@ -272,7 +334,8 @@ export const CardForm = ({
                 />
                 <FormTextArea
                   name="exclusionComment"
-                  label="Причина исключения"
+                  label="Комментарий"
+                  placeholder="к выпуску или причина исключения"
                   styles="h-[24px]"
                 />
               </div>
@@ -296,7 +359,7 @@ export const CardForm = ({
                 </AlertDialogBase>
                 <Button
                   className="w-[200px]"
-                  disabled={isUpserting || isSuccess}
+                  disabled={isUpserting || isSuccess || !isFormValid}
                   type="submit"
                   // onClick={async () => {
                   //   console.log("SUBM CLICK");

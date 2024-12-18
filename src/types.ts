@@ -4,6 +4,12 @@ export const Roles = ["guest", "user", "admin"] as const;
 /** User roles */
 export type Role = (typeof Roles)[number];
 
+export type GenericResponse<T = never> = {
+  success: boolean;
+  message?: string;
+  payload?: T;
+};
+
 /** Тэги видов поиска (enum) */
 export const SearchVariants = [
   "eq",

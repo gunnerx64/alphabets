@@ -12,8 +12,19 @@ export const parseColor = (color: string) => {
 
 export function shortenFullName(
   lastname: string,
-  firstname: string,
-  middlname: string | null = null,
+  firstname: string | undefined | null = null,
+  middlename: string | undefined | null = null,
 ): string {
-  return `${lastname} ${firstname.at(0)}.${middlname ? middlname.at(0) + "." : ""}`;
+  return `${lastname} ${firstname ? firstname.at(0) + "." : ""}${middlename ? middlename.at(0) + "." : ""}`;
+}
+
+/** async convert Blob image to base64 image */
+export async function blobToBase64(blob: Blob): Promise<string> {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise((resolve) => {
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+  });
 }

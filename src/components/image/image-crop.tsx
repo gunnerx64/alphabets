@@ -1,17 +1,21 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactCrop, { PixelCrop, type Crop } from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css";
-import { Button } from "../ui/button";
 import { ImageZoom } from "./image-zoom";
 import { useDebounceEffect } from "@/hooks/use-debounce-effect";
 import { canvasPreview } from "./canvasPreview";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import "react-image-crop/dist/ReactCrop.css";
 
 interface ImageCropProps {
+  onCropped?: (blob: Blob | null) => void;
+  errorMessage?: string;
   src?: string;
 }
 
-export function ImageCrop({ src }: ImageCropProps) {
+export function ImageCrop({ errorMessage, onCropped }: ImageCropProps) {
   const [imgSrc, setImgSrc] = useState("");
   const imgRef = useRef<HTMLImageElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -103,16 +107,33 @@ export function ImageCrop({ src }: ImageCropProps) {
     setCroppedBlobUrl(urlCreator.createObjectURL(blob));
   }
 
+  // refresh scan base64 url when it changed
+  useEffect(() => {
+    if (onCropped) onCropped(croppedBlob);
+  }, [croppedBlob]);
+
   return (
     <div className="flex w-full flex-col items-center gap-2">
       <div className="flex w-full items-center justify-between">
-        <input
-          hidden={!!imgSrc}
-          type="file"
-          accept="image/*"
-          onChange={onSelectFile}
-        />
-        {!!imgSrc && <div></div>}
+        <div
+          className={`${!!imgSrc ? "hidden" : "grid"} w-full max-w-sm items-center gap-1.5`}
+        >
+          <Label
+            className={errorMessage && "text-destructive"}
+            htmlFor="scanImg"
+          >
+            Скан алфавитки *
+          </Label>
+          <Input
+            id="scanImg"
+            type="file"
+            accept="image/*"
+            onChange={onSelectFile}
+          />
+        </div>
+        {!!imgSrc && (
+          <div className="text-destructive">{errorMessage ?? ""}</div>
+        )}
         <div className="flex gap-2">
           <Button
             variant={"secondary"}

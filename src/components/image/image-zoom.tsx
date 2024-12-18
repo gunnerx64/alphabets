@@ -14,8 +14,8 @@ export const ImageZoom = ({ src }: ImageZoomProps) => {
         limitToBounds={true}
         disablePadding={false}
         initialScale={1}
-        initialPositionX={200}
-        initialPositionY={100}
+        initialPositionX={0}
+        initialPositionY={0}
       >
         {({ zoomIn, zoomOut, resetTransform, ...rest }) => (
           <React.Fragment>

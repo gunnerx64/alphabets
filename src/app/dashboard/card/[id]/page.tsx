@@ -4,6 +4,7 @@ import { CardPageContent } from "./card-page-content";
 import { auth } from "@/server/auth";
 import { shortenFullName } from "@/lib/utils";
 import { getCard } from "@/server/api/routers/card";
+import { storageUrlPrefix } from "@/server/utils";
 
 interface PageProps {
   params: Promise<{
@@ -29,7 +30,7 @@ const Page = async ({ params }: PageProps) => {
     <DashboardPage
       title={shortenFullName(card.lastname, card.firstname, card.middlename)}
     >
-      <CardPageContent card={card} />
+      <CardPageContent card={card} storageUrl={storageUrlPrefix()} />
     </DashboardPage>
   );
 };

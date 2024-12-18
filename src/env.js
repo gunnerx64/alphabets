@@ -19,6 +19,11 @@ export const env = createEnv({
     AUTH_CUSTOM_URL: z.string().optional(),
     AUTH_CUSTOM_ID: z.string().optional(),
     AUTH_CUSTOM_SECRET: z.string().optional(),
+    S3_ENDPOINT: z.string().optional(),
+    S3_PORT: z.coerce.number().optional(),
+    S3_ACCESS_KEY: z.string().optional(),
+    S3_SECRET_KEY: z.string().optional(),
+    S3_BUCKET_NAME: z.string().optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -49,6 +54,11 @@ export const env = createEnv({
     AUTH_CUSTOM_URL: process.env.AUTH_CUSTOM_URL,
     AUTH_CUSTOM_ID: process.env.AUTH_CUSTOM_ID,
     AUTH_CUSTOM_SECRET: process.env.AUTH_CUSTOM_SECRET,
+    S3_ENDPOINT: process.env.S3_ENDPOINT,
+    S3_PORT: process.env.S3_PORT,
+    S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
+    S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },
