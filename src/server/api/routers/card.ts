@@ -15,7 +15,6 @@ export const getCard = async (id: string) =>
     with: {
       region: true,
       createdBy: { columns: { name: true } },
-      updatedBy: { columns: { name: true } },
     },
     where: eq(cards.id, id),
   });
@@ -33,7 +32,6 @@ export const cardRouter = createTRPCRouter({
         with: {
           region: true,
           createdBy: { columns: { name: true } },
-          updatedBy: { columns: { name: true } },
         },
         orderBy: desc(cards.createdAt),
         //TODO: add advanced search
@@ -99,21 +97,21 @@ export const cardRouter = createTRPCRouter({
       // return isValid(parsedDate);
       const exclusionDate = input.exclusionDate ?? null;
       const graduateYear = input.graduateYear ?? null;
-
+      // only if card is created we set createdById to current user
+      let createdById = input.id ? {} : { createdById: ctx.session.user.id };
       const values: CardInsert = {
         ...input,
+        ...createdById,
         exclusionDate,
         graduateYear,
-        // if card is created set createdById to current user
-        createdById: input.id ? input.createdById : ctx.session.user.id,
-        // if card is updated set updatedById to current user
-        updatedById: input.id ? ctx.session.user.id : null,
+        // if card is updated set updatedBy to current user
+        updatedBy: input.id ? (ctx.session.user.name ?? "Неизвестный") : null,
       };
 
       const upsertedCard = await ctx.db
         .insert(cards)
         .values(values)
-        .onConflictDoUpdate({ target: cards.id, set: input })
+        .onConflictDoUpdate({ target: cards.id, set: values })
         .returning({ id: cards.id });
 
       console.log("successfully upserted card: ", upsertedCard);

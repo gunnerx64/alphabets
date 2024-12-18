@@ -159,7 +159,7 @@ export const CardPageContent = ({ card, storageUrl }: CardPageContentProps) => {
               <DataElement
                 Icon={Clock}
                 title="Редактировал"
-                content={`${card.updatedBy.name} (${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
+                content={`${card.updatedBy} (${card.updatedAt.toLocaleTimeString("ru-ru")} ${card.updatedAt.toLocaleDateString("ru-ru")} г.)`}
               />
             )}
           </div>
@@ -191,13 +191,13 @@ export const CardPageContent = ({ card, storageUrl }: CardPageContentProps) => {
                   title="Дата исключения"
                   content={`${card.exclusionDate ? new Date(card.exclusionDate).toLocaleDateString("ru-ru") + " г." : "нет данных"}`}
                 />
-                <DataElement
-                  Icon={Clock}
-                  title="Причина исключения"
-                  content={`${card.exclusionComment ?? "нет данных"}`}
-                />
               </>
             )}
+            <DataElement
+              Icon={Clock}
+              title="Комментарий к выпуску"
+              content={`${card.exclusionComment ?? "отсутсвует"}`}
+            />
           </div>
         </div>
 

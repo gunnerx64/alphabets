@@ -8,6 +8,13 @@
       "when": 1734304052270,
       "tag": "0000_brainy_daimon_hellstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1734551916845,
+      "tag": "0001_cool_manta",
+      "breakpoints": true
     }
   ]
 }

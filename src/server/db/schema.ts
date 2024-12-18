@@ -55,7 +55,7 @@ export const cards = createTable(
     updatedAt: timestamp("updated_at")
       .default(sql`NULL`)
       .$onUpdate(() => new Date()),
-    updatedById: uuid("updated_by_id").references(() => users.id),
+    updatedBy: varchar("updated_by", { length: 64 }),
   },
   (tbl) => {
     return {
@@ -75,10 +75,6 @@ export const cardRelations = relations(cards, ({ one }) => ({
     fields: [cards.createdById],
     references: [users.id],
   }),
-  updatedBy: one(users, {
-    fields: [cards.updatedById],
-    references: [users.id],
-  }),
 }));
 
 export type User = typeof users.$inferSelect;
@@ -90,8 +86,6 @@ export type Card = typeof cards.$inferSelect; //& { createdBy: User };
 export type CardInsert = typeof cards.$inferInsert;
 export type CardWithRefs = Card & { region?: Region } & {
   createdBy: Pick<User, "name"> | null;
-} & {
-  updatedBy: Pick<User, "name"> | null;
 };
 
 const userRole = pgEnum("role", Roles);
@@ -111,6 +105,7 @@ export const users = createTable("user", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  createdCards: many(cards),
 }));
 
 export const accounts = createTable(
