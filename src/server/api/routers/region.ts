@@ -1,3 +1,5 @@
+import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -9,7 +11,7 @@ const uncachedGetRegionsOptions = async () => {
   });
 };
 
-export const getRegionsOptions = uncachedGetRegionsOptions;
+export const getRegionsOptions = cache(uncachedGetRegionsOptions);
 
 export const regionRouter = createTRPCRouter({
   getRegionOptions: protectedProcedure

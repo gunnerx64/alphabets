@@ -1,3 +1,4 @@
+import "server-only";
 import { and, count, eq, gte, lt } from "drizzle-orm";
 import {
   createTRPCRouter,
@@ -14,6 +15,7 @@ import { zod } from "@/lib/zod-helpers";
 import { addDays, startOfDay, startOfToday, startOfTomorrow } from "date-fns";
 
 const uncachedGetUser = async (id: string) => {
+  console.log("GetUser called");
   return await db.query.users.findFirst({
     with: { accounts: true },
     where: eq(users.id, id),
