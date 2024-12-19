@@ -41,6 +41,7 @@ export const CardUpsertValidator: z.ZodType<CardInsert> = z
       .number({ invalid_type_error: "Некорректный год" })
       // .min(1922, "Год выпуска должен быть в диапазоне [1922:1991]")
       // .max(1991, "Год выпуска должен быть в диапазоне [1922:1991]")
+      .transform((val) => val || null)
       .optional()
       .nullable(),
     exclusionDate: zod.optionalStringDate(),
@@ -51,10 +52,7 @@ export const CardUpsertValidator: z.ZodType<CardInsert> = z
       .string(/*{ required_error: "Не указан id создателя алфавитки" }*/)
       .uuid()
       .optional(),
-    // updatedAt: timestamp("updated_at")
-    //   .defaultNow()
-    //   .$onUpdate(() => new Date()),
-    // updatedByUserId
+    updatedBy: zod.optionalNullableString(),
   })
   .superRefine((values, context) => {
     function addMissingError(path: string, msg?: string): void {

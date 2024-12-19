@@ -30,7 +30,7 @@ export function BasePagination<TData>({
         {total !== undefined ? total : table.getFilteredRowModel().rows.length}{" "}
         записей.
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
+      <div className="flex items-center justify-end space-x-4 lg:space-x-6">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Строк на страницу:</p>
           <Select
@@ -51,7 +51,7 @@ export function BasePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[165px] items-center justify-center text-sm font-medium">
+        <div className="text-sm font-medium">
           Страница {table.getState().pagination.pageIndex + 1} из{" "}
           {table.getPageCount()}
         </div>

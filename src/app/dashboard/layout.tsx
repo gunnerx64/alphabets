@@ -20,7 +20,7 @@ export default async function Layout({ children }: PropsWithChildren) {
     <>
       <SidebarProvider defaultOpen={defaultOpen}>
         <DashboardSidebar />
-        <section>{children}</section>
+        {children}
       </SidebarProvider>
     </>
   );

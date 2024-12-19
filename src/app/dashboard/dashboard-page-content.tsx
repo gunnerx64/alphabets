@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { LoadingSpinner } from "@/components/loading-spinner";
 import { DashboardEmptyState } from "./dashboard-empty-state";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +20,7 @@ import {
 import { buildCardColumns } from "./columns";
 import { api } from "@/trpc/react";
 import { BasePagination } from "@/components/table/base-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardPageContentProps {
   isAdmin: boolean;
@@ -47,16 +47,27 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
       refetchInterval: 30000,
     },
   );
-  // console.log("cards = ", cards);
   const { data: cardsTotal } = api.card.getCardsCount.useQuery();
 
   const columns = useMemo(
     () => buildCardColumns(isAdmin, isGuest),
     [isAdmin, isGuest],
   );
+
+  const columnsToRender = useMemo(
+    () =>
+      isCardsLoading
+        ? columns.map((column) => ({
+            ...column,
+            Cell: <Skeleton />,
+          }))
+        : columns,
+    [columns, isCardsLoading],
+  );
+
   const table = useReactTable({
     data: cards || [],
-    columns: columns,
+    columns: columnsToRender,
     getCoreRowModel: getCoreRowModel(),
     // onSortingChange: setSorting,
     // getSortedRowModel: getSortedRowModel(),
@@ -86,15 +97,15 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
     router.push(`?${searchParams.toString()}`, { scroll: false });
   }, [pagination, router]);
 
-  if (isCardsLoading) {
-    return (
-      <div className="flex h-full w-full flex-1 items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  // if (isCardsLoading) {
+  //   return (
+  //     <div className="flex h-full w-full flex-1 items-center justify-center">
+  //       <LoadingSpinner />
+  //     </div>
+  //   );
+  // }
 
-  if (!cards || cards.length === 0) {
+  if (cards && cards.length === 0) {
     return <DashboardEmptyState />;
   }
 

@@ -1,15 +1,8 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { signOut, useSession } from "next-auth/react";
-import {
-  Calendar,
-  ChevronsUpDown,
-  GlobeLock,
-  Search,
-  Settings,
-  User2,
-} from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Calendar, GlobeLock, Search, Settings, User2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,12 +15,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { DashboardNavUser } from "./dashboard-nav-user";
 
 const pathPrefix = "/dashboard";
@@ -65,7 +52,7 @@ const adminItems = [
 
 export function DashboardSidebar() {
   const { data: session } = useSession();
-  if (session === null) console.log("WARNING: session is null");
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -108,21 +95,25 @@ export function DashboardSidebar() {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-          <SidebarGroupLabel>Администрирование</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          {session?.user.role === "admin" && (
+            <>
+              <SidebarGroupLabel>Администрирование</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {adminItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </>
+          )}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>

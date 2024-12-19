@@ -21,7 +21,7 @@ export const buildCardColumns = (
 ): ColumnDef<CardWithRefs, any>[] => [
   columnHelper.display({
     id: "index",
-    header: "№ п/п",
+    header: () => <div className="text-center font-semibold">№ п/п</div>,
     cell: (info) => {
       const pagination = info.table.getState().pagination;
       return (
@@ -37,7 +37,9 @@ export const buildCardColumns = (
   }),
   columnHelper.display({
     id: "bio",
-    header: "Личные данные",
+    header: () => (
+      <div className="text-center font-semibold">Личные данные</div>
+    ),
     // header: ({ column }) => (
     //   <BaseDataTableColumnHeader column={column} title="номер" />
     // ),
@@ -59,21 +61,21 @@ export const buildCardColumns = (
 
       return (
         <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[150px] grid-cols-3 gap-1 xl:min-w-[200px]">
+          <div className="grid min-w-[190px] grid-cols-2 gap-1">
             <div className="text-right">
               <TinyBadge className="text-right">фио</TinyBadge>
             </div>
-            <span className="col-span-2 break-words font-bold">{fullName}</span>
+            <span className="break-words font-bold">{fullName}</span>
             <div className="text-right">
               <TinyBadge>д.р.</TinyBadge>
             </div>
-            <span className="col-span-2">{birthdate} г.</span>
+            <span>{birthdate} г.</span>
             {token && (
               <>
                 <div className="text-right">
                   <TinyBadge>личный номер</TinyBadge>
                 </div>
-                <div className="col-span-2">{token}</div>
+                <div>{token}</div>
               </>
             )}
             {isAdmin && updatedByCaption && (
@@ -81,7 +83,7 @@ export const buildCardColumns = (
                 <div className="text-right">
                   <TinyBadge variant={"destructive"}>изменил</TinyBadge>
                 </div>
-                <div className="col-span-2 break-words">{updatedByCaption}</div>
+                <div className="break-words">{updatedByCaption}</div>
               </>
             )}
           </div>
@@ -92,10 +94,9 @@ export const buildCardColumns = (
   }),
   columnHelper.display({
     id: "admission",
-    header: "Сведения об обучении",
-    // header: ({ column }) => (
-    //   <BaseDataTableColumnHeader column={column} title="номер" />
-    // ),
+    header: () => (
+      <div className="text-center font-semibold">Сведения об обучении</div>
+    ),
     cell: (info) => {
       const region = info.row.original.region?.title ?? "";
       const admissionYear = info.row.original.admissionYear;
@@ -107,22 +108,22 @@ export const buildCardColumns = (
 
       return (
         <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[150px] grid-cols-3 gap-1 xl:min-w-[330px]">
+          <div className="grid min-w-[230px] grid-cols-2 gap-1">
             <div className="text-right">
               <TinyBadge>откуда прибыл</TinyBadge>
             </div>
-            <div className="col-span-2 break-words">{region}</div>
+            <div className="break-words">{region}</div>
             <div className="text-right">
               <TinyBadge>год поступления</TinyBadge>
             </div>
-            <div className="col-span-2">{admissionYear}</div>
+            <div>{admissionYear}</div>
 
             {graduateYear && (
               <>
                 <div className="text-right">
                   <TinyBadge>год выпуска</TinyBadge>
                 </div>
-                <div className="col-span-2">{graduateYear}</div>
+                <div>{graduateYear}</div>
               </>
             )}
             {graduateYear && exclusionComment && (
@@ -130,7 +131,7 @@ export const buildCardColumns = (
                 <div className="text-right">
                   <TinyBadge>комментарий</TinyBadge>
                 </div>
-                <div className="col-span-2">{exclusionComment}</div>
+                <div>{exclusionComment}</div>
               </>
             )}
             {exclusionDate && (
@@ -138,7 +139,7 @@ export const buildCardColumns = (
                 <div className="text-right">
                   <TinyBadge>исключён</TinyBadge>
                 </div>
-                <div className="col-span-2">{exclusionDate} г.</div>
+                <div>{exclusionDate} г.</div>
               </>
             )}
             {exclusionDate && exclusionComment && (
@@ -146,7 +147,7 @@ export const buildCardColumns = (
                 <div className="text-right">
                   <TinyBadge>комментарий</TinyBadge>
                 </div>
-                <div className="col-span-2">{exclusionComment}</div>
+                <div>{exclusionComment}</div>
               </>
             )}
           </div>
@@ -157,8 +158,7 @@ export const buildCardColumns = (
   }),
   columnHelper.display({
     id: "action",
-    header: "Действия",
-    // header: () => <div className="text-center font-extrabold">Д</div>,
+    header: () => <div className="text-center font-semibold">Действия</div>,
     cell: (props) => {
       const cardId = props.row.original.id;
       const lastname = props.row.original.lastname;

@@ -1,8 +1,11 @@
 "use client";
 import { ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "./ui/separator";
+import {
+  SidebarInset,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ThemeToggleButton } from "@/components/theme-toggle-button";
+import { cn } from "@/lib/utils";
 
 interface DashboardPageProps {
   title: string;
@@ -26,50 +30,52 @@ export const DashboardPage = ({
   cta,
   hideBackButton,
 }: DashboardPageProps) => {
-  // const router = useRouter();
-
+  const { isMobile, state } = useSidebar();
   return (
-    <SidebarInset>
-      <header className="ml-4 mr-8 mt-4 flex shrink-0 flex-col items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:flex-row md:justify-between">
+    <SidebarInset className="overflow-auto">
+      <header
+        className={cn(
+          "fixed z-20 flex shrink-0 items-center justify-between gap-2 border-b bg-opacity-30 p-4 pb-2 backdrop-blur-lg backdrop-filter transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 sm:px-8",
+          {
+            "w-full": isMobile,
+            "w-[calc(100%-var(--sidebar-width))]":
+              !isMobile && state === "expanded",
+            "w-[calc(100%-var(--sidebar-width-icon))]":
+              !isMobile && state === "collapsed",
+          },
+        )}
+      >
         <div className="flex w-full items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
-            <BreadcrumbList>
+            <BreadcrumbList className="text-xl">
               {hideBackButton ? null : (
                 <>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="/dashboard" className="text-2xl">
+                  <BreadcrumbItem className="hidden sm:block">
+                    <BreadcrumbLink href="/dashboard" className="">
                       Главная
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbSeparator className="hidden sm:block" />
                 </>
               )}
 
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-2xl">{title}</BreadcrumbPage>
+                <BreadcrumbPage>{title}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div className="flex w-fit items-center justify-end gap-4">
-          {cta && (
-            <>
-              <div>{cta}</div>
-              <Separator
-                orientation="vertical"
-                className="hidden h-8 md:inline-block"
-              />
-            </>
-          )}
-          <div className="hidden md:inline-block">
-            <ThemeToggleButton />
-          </div>
-        </div>
+        {/* <Separator orientation="vertical" className="h-8" /> */}
+        <ThemeToggleButton />
       </header>
 
-      <div className="flex flex-1 flex-col overflow-y-auto p-6 sm:p-8">
+      <div className="mt-12 flex w-full items-center justify-center pt-6">
+        {cta && cta}
+      </div>
+
+      <div className="mx-auto flex w-full flex-1 flex-col overflow-y-auto p-4 sm:p-8 sm:pt-4">
         {children}
       </div>
     </SidebarInset>
