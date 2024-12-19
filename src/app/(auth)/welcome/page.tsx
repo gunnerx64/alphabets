@@ -10,7 +10,7 @@ export default function Page() {
   const router = useRouter();
   const { data } = api.user.getDatabaseSyncStatus.useQuery(undefined, {
     refetchInterval(query) {
-      return query.state.data?.isSynced ? false : 1000;
+      return query.state.data?.isSynced ? false : 2000;
     },
   });
 

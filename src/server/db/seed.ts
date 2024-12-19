@@ -1,6 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import pg from "pg";
 // import { faker } from "@faker-js/faker";
 import * as schema from "./schema";
 import "@/envConfig";
@@ -28,9 +27,11 @@ const main = async () => {
     const data: (typeof schema.regions.$inferInsert)[] = [];
     let sort = 0;
     for (let s = 0; s < staticRegions.length; s++) {
+      //@ts-expect-error
       for (let i = 0; i < staticRegions[s].regions.length; i++) {
         data.push({
           state: staticRegions[s]?.state,
+          //@ts-expect-error
           title: staticRegions[s]?.regions[i],
           sort: sort++,
         });
@@ -39,6 +40,7 @@ const main = async () => {
     console.log("Seed regions started");
     await db.insert(schema.regions).values(data);
     console.log(
+      //@ts-expect-error
       `Seed regions completed (count: ${await db.$count(schema.regions)})`,
     );
   } else console.log(`Seed regions skipped (count: ${foundRegions.length})`);

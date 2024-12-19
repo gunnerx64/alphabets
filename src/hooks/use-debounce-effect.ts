@@ -7,6 +7,7 @@ export function useDebounceEffect(
 ) {
   useEffect(() => {
     const t = setTimeout(() => {
+      //@ts-expect-error
       fn.apply(undefined, deps);
     }, waitTime);
 

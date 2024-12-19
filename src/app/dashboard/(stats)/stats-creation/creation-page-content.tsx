@@ -89,10 +89,7 @@ export const CreationPageContent = () => {
             <Card key={idx} className="border-2 border-brand-700 p-2">
               <div className="flex flex-row items-center gap-4">
                 <Avatar className="size-20 rounded-lg">
-                  <AvatarImage
-                    src={image ?? "/user-1.png"}
-                    alt={name ?? "USER"}
-                  />
+                  <AvatarImage src={"/user-1.png"} alt={name ?? "USER"} />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="flex-grow">

@@ -139,6 +139,7 @@ export const authConfig = {
   debug: false,
   //? FIXME for work behind proxy
   trustHost: true,
+  //@ts-expect-error
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
