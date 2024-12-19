@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import { TRPCReactProvider } from "@/trpc/react";
 import { HydrateClient } from "@/trpc/server";
 import { SessionProvider } from "next-auth/react";
-import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Алфавитки",

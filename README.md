@@ -37,6 +37,18 @@ and copy the .env.example variables into a separate .env file, fill them out & a
   pnpm add cmdk@0.2.1
 ```
 
+- trpc использует класс TextDecoderStream, он поддерживается в Firefox 105+, для поддержки старых браузеров необходимо импортировать библиотеку @stardazed/streams-polyfill
+
+```bash
+  pnpm add @stardazed/streams-polyfill
+```
+
+В файле клиентского провайдера, например, ThemeProvider:
+
+```js
+import "@stardazed/streams-polyfill";
+```
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

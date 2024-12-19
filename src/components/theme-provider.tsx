@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { ThemeProviderProps } from "next-themes";
+import "@stardazed/streams-polyfill";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const [isMounted, setIsMounted] = useState(false);

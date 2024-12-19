@@ -7,6 +7,7 @@ import "./src/env.js";
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
+  // add any other package that is breaking on old browsers
   transpilePackages: ["geist"],
   experimental: {
     serverActions: {
