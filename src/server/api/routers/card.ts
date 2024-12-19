@@ -95,8 +95,8 @@ export const cardRouter = createTRPCRouter({
       //   locale: ru,
       // });
       // return isValid(parsedDate);
-      const exclusionDate = input.exclusionDate ?? null;
-      const graduateYear = input.graduateYear ?? null;
+      const exclusionDate = input.exclusionDate || null;
+      const graduateYear = input.graduateYear || null;
       // only if card is created we set createdById to current user
       let createdById = input.id ? {} : { createdById: ctx.session.user.id };
       const values: CardInsert = {
@@ -107,6 +107,7 @@ export const cardRouter = createTRPCRouter({
         // if card is updated set updatedBy to current user
         updatedBy: input.id ? (ctx.session.user.name ?? "Неизвестный") : null,
       };
+      console.log("upsercard: ", values);
 
       const upsertedCard = await ctx.db
         .insert(cards)
