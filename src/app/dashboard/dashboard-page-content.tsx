@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { buildCardColumns } from "./columns";
 import { api } from "@/trpc/react";
+import { BasePagination } from "@/components/table/base-pagination";
 
 interface DashboardPageContentProps {
   isAdmin: boolean;
@@ -31,7 +32,7 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
   const searchParams = useSearchParams();
   // https://localhost:3000/dashboard/category/sale?page=5&limit=30
   const page = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("pageSize") || "15", 10);
+  const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
   const [pagination, setPagination] = useState({
     pageIndex: page - 1,
     pageSize: pageSize,
@@ -46,7 +47,7 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
       refetchInterval: 30000,
     },
   );
-  console.log("cards = ", cards);
+  // console.log("cards = ", cards);
   const { data: cardsTotal } = api.card.getCardsCount.useQuery();
 
   const columns = useMemo(
@@ -98,69 +99,77 @@ export const DashboardPageContent = (props: DashboardPageContentProps) => {
   }
 
   return (
-    <>
-      <div className="flex flex-col gap-4">
-        <Card>
-          <CardContent className="group relative z-10 p-1">
-            {/* <div className="absolute inset-px z-0 rounded-lg bg-white" /> */}
-            <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
+    <Card>
+      <CardContent className="group relative z-10 p-1">
+        {/* <div className="absolute inset-px z-0 rounded-lg bg-white" /> */}
+        <div className="pointer-events-none absolute inset-px z-0 rounded-lg shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-md" />
+        <div className="flex flex-col gap-4">
+          {cardsTotal && 1 < cardsTotal && (
+            <div className="border-b-2 p-2">
+              <BasePagination table={table} total={cardsTotal} />
+            </div>
+          )}
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+
+            <TableBody>
+              {isCardsLoading ? (
+                [...Array(5)].map((_, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {columns.map((_, cellIndex) => (
+                      <TableCell key={cellIndex}>
+                        <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+                      </TableCell>
                     ))}
                   </TableRow>
-                ))}
-              </TableHeader>
-
-              <TableBody>
-                {isCardsLoading ? (
-                  [...Array(5)].map((_, rowIndex) => (
-                    <TableRow key={rowIndex}>
-                      {columns.map((_, cellIndex) => (
-                        <TableCell key={cellIndex}>
-                          <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      No results.
-                    </TableCell>
+                ))
+              ) : table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          {cardsTotal && 1 < cardsTotal && (
+            <div className="border-t-2 p-2">
+              <BasePagination table={table} total={cardsTotal} />
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };

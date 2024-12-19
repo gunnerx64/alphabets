@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
@@ -7,7 +6,6 @@ import { PrinterIcon, XSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardWithRefs } from "@/server/db/schema";
 import { addLineBreak } from "@/lib/addLineBreak";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { TinyBadge } from "@/components/tiny-badge";
 import { TooltipBase } from "@/components/tooltip-base";
@@ -41,7 +39,7 @@ export const buildCardColumns = (
     id: "bio",
     header: "Личные данные",
     // header: ({ column }) => (
-    //   <BaseDataTableColumnHeader column={column} title="№ трупа" />
+    //   <BaseDataTableColumnHeader column={column} title="номер" />
     // ),
     cell: (info) => {
       const fullName = `${info.row.original.lastname} ${info.row.original.firstname} ${info.row.original.middlename ?? ""}`;
@@ -50,7 +48,7 @@ export const buildCardColumns = (
         : null;
       const token = info.row.original.token;
       const rankComment = info.row.original.rankComment;
-      const updatedBy = info.row.original.updatedBy?.name;
+      const updatedBy = info.row.original.updatedBy;
       const updatedAt = info.row.original.updatedAt
         ? `${info.row.original.updatedAt.toLocaleTimeString(
             "ru-RU",
@@ -61,33 +59,30 @@ export const buildCardColumns = (
 
       return (
         <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[150px] grid-cols-1 gap-1 xl:min-w-[220px] xl:grid-cols-2">
-            <div className="col-span-2 break-words">
-              <TinyBadge>фио</TinyBadge>{" "}
-              <span className="font-bold">{fullName}</span>
+          <div className="grid min-w-[150px] grid-cols-3 gap-1 xl:min-w-[200px]">
+            <div className="text-right">
+              <TinyBadge className="text-right">фио</TinyBadge>
             </div>
-            <div>
-              <TinyBadge>д.р.</TinyBadge> {birthdate}
+            <span className="col-span-2 break-words font-bold">{fullName}</span>
+            <div className="text-right">
+              <TinyBadge>д.р.</TinyBadge>
             </div>
-            {token ? (
-              <div className="col-span-2 break-words">
-                <TinyBadge>личный номер</TinyBadge> {token}
-              </div>
-            ) : (
-              <div></div>
-            )}
-            {rankComment ? (
-              <div className="col-span-2 break-words">
-                <TinyBadge>в.звание</TinyBadge> {rankComment}
-              </div>
-            ) : (
-              <div></div>
+            <span className="col-span-2">{birthdate} г.</span>
+            {token && (
+              <>
+                <div className="text-right">
+                  <TinyBadge>личный номер</TinyBadge>
+                </div>
+                <div className="col-span-2">{token}</div>
+              </>
             )}
             {isAdmin && updatedByCaption && (
-              <div className="col-span-2 break-words">
-                <TinyBadge>редактировал</TinyBadge>
-                {updatedAt}
-              </div>
+              <>
+                <div className="text-right">
+                  <TinyBadge variant={"destructive"}>изменил</TinyBadge>
+                </div>
+                <div className="col-span-2 break-words">{updatedByCaption}</div>
+              </>
             )}
           </div>
         </Link>
@@ -96,10 +91,10 @@ export const buildCardColumns = (
     footer: (props) => props.column.id,
   }),
   columnHelper.display({
-    id: "graduate",
-    header: "Сведения о выпуске",
+    id: "admission",
+    header: "Сведения об обучении",
     // header: ({ column }) => (
-    //   <BaseDataTableColumnHeader column={column} title="№ трупа" />
+    //   <BaseDataTableColumnHeader column={column} title="номер" />
     // ),
     cell: (info) => {
       const region = info.row.original.region?.title ?? "";
@@ -112,49 +107,53 @@ export const buildCardColumns = (
 
       return (
         <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[150px] grid-cols-1 gap-1 xl:min-w-[200px]">
-            <div className="break-words">
-              <TinyBadge>откуда прибыл</TinyBadge> {region}
+          <div className="grid min-w-[150px] grid-cols-3 gap-1 xl:min-w-[330px]">
+            <div className="text-right">
+              <TinyBadge>откуда прибыл</TinyBadge>
             </div>
-            <div>
-              <TinyBadge>год поступления</TinyBadge> {admissionYear}
+            <div className="col-span-2 break-words">{region}</div>
+            <div className="text-right">
+              <TinyBadge>год поступления</TinyBadge>
             </div>
+            <div className="col-span-2">{admissionYear}</div>
+
             {graduateYear && (
-              <div>
-                <TinyBadge>год выпуска</TinyBadge> {graduateYear}
-              </div>
+              <>
+                <div className="text-right">
+                  <TinyBadge>год выпуска</TinyBadge>
+                </div>
+                <div className="col-span-2">{graduateYear}</div>
+              </>
+            )}
+            {graduateYear && exclusionComment && (
+              <>
+                <div className="text-right">
+                  <TinyBadge>комментарий</TinyBadge>
+                </div>
+                <div className="col-span-2">{exclusionComment}</div>
+              </>
             )}
             {exclusionDate && (
-              <div className="break-words">
-                <TinyBadge>дата исключения</TinyBadge> {exclusionDate}
-              </div>
+              <>
+                <div className="text-right">
+                  <TinyBadge>исключён</TinyBadge>
+                </div>
+                <div className="col-span-2">{exclusionDate} г.</div>
+              </>
             )}
-            {exclusionComment && (
-              <div className="break-words">
-                <TinyBadge>причина</TinyBadge> {exclusionComment}
-              </div>
+            {exclusionDate && exclusionComment && (
+              <>
+                <div className="text-right">
+                  <TinyBadge>комментарий</TinyBadge>
+                </div>
+                <div className="col-span-2">{exclusionComment}</div>
+              </>
             )}
           </div>
         </Link>
       );
     },
     footer: (props) => props.column.id,
-  }),
-  columnHelper.display({
-    id: "scan",
-    header: "Скан оригинала",
-    cell: (props) => {
-      return (
-        <div className="flex min-w-[64px] items-center">
-          <Image
-            width={100}
-            height={60}
-            src="/bento-any-event.png"
-            alt="Скан алфавитки ..."
-          />
-        </div>
-      );
-    },
   }),
   columnHelper.display({
     id: "action",
@@ -188,7 +187,7 @@ export const buildCardColumns = (
       });
 
       return (
-        <div className="flex flex-col items-center space-y-2">
+        <div className="flex flex-col items-center justify-center gap-1 xl:flex-row">
           {/* Печать*/}
           {
             <TooltipBase title="Распечатать карточку">
@@ -220,7 +219,7 @@ export const buildCardColumns = (
               </Button>
             </TooltipBase> */}
           {/* Delete card */}
-          {
+          {isAdmin && (
             <AlertDialogBase
               title="Удаление карточки"
               desc={addLineBreak(
@@ -239,7 +238,7 @@ export const buildCardColumns = (
                 </TooltipBase>
               </Button>
             </AlertDialogBase>
-          }
+          )}
         </div>
       );
     },
