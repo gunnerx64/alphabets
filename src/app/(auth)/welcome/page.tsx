@@ -8,26 +8,59 @@ import { api } from "@/trpc/react";
 
 export default function Page() {
   const router = useRouter();
-  const { data } = api.user.getDatabaseSyncStatus.useQuery(undefined, {
-    refetchInterval(query) {
-      return query.state.data?.isSynced ? false : 2000;
+  const { data, isPending } = api.user.getSyncAndPromoteStatus.useQuery(
+    undefined,
+    {
+      refetchInterval(query) {
+        return query.state.data?.isSynced &&
+          query.state.data?.isActive &&
+          query.state.data?.isPromoted
+          ? false
+          : 10000;
+      },
     },
-  });
+  );
 
   useEffect(() => {
-    if (data?.isSynced) router.push("/dashboard");
+    if (data?.isPromoted && data?.isActive) router.push("/dashboard");
   }, [data, router]);
 
   return (
     <div className="flex w-full flex-1 items-center justify-center px-4">
-      <BackgroundPattern className="absolute inset-0 left-1/2 z-0 -translate-x-1/2 opacity-75" />
+      <BackgroundPattern className="absolute inset-0 left-1/2 z-0 -translate-x-1/2 opacity-75 dark:opacity-20" />
 
       <div className="relative z-10 flex -translate-y-1/2 flex-col items-center gap-6 text-center">
         <LoadingSpinner size="md" />
         <Heading>Настраиваем ваш аккаунт...</Heading>
-        <p className="max-w-prose text-base/7 text-gray-600">
-          Проверяем наличие учетной записи, прав доступа, роли в системе.
-        </p>
+        {data?.isSynced === true ? (
+          <p className="max-w-prose text-base/7 text-foreground/80">
+            Учетная запись создана.
+          </p>
+        ) : (
+          <p className="max-w-prose text-base/7 text-foreground/80">
+            Проверяем наличие и активацию учетной записи, прав доступа к
+            системе.
+          </p>
+        )}
+        {isPending ? (
+          <div className="h-7"></div>
+        ) : data?.isActive === false ? (
+          <p className="h-7 max-w-prose text-pretty text-base/7 text-red-500/90">
+            Ваша учетная запись отключена. Обратитесь к администратору.
+          </p>
+        ) : (
+          <div className="h-7 max-w-prose text-pretty text-base/7 text-foreground/80">
+            Ваша учетная запись активна.
+          </div>
+        )}
+        {data?.isPromoted === false ? (
+          <p className="max-w-prose text-pretty text-base/7 text-red-500/90">
+            Ваша учетная запись не имеет достаточно прав для доступа к системе.
+            Обратитесь к администратору.
+          </p>
+        ) : (
+          <div className="h-14"></div>
+        )}
       </div>
     </div>
   );

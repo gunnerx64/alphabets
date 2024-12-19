@@ -45,17 +45,25 @@ const uncachedGetUserCreatedCardsCount = async (
 export const getUserCreatedCardsCount = cache(uncachedGetUserCreatedCardsCount);
 
 export const userRouter = createTRPCRouter({
-  getDatabaseSyncStatus: publicProcedure.query(async ({ ctx }) => {
+  getSyncAndPromoteStatus: publicProcedure.query(async ({ ctx }) => {
     const session = await auth();
-
     if (!session || !session.user) {
-      return { isSynced: false };
+      return { isSynced: false, isActive: false, isPromoted: false };
     }
 
     const user = await getUser(session.user.id);
-
-    if (user) return { isSynced: true };
-    else throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    if (user) {
+      return {
+        isSynced: true,
+        isPromoted: user.role !== "guest",
+        isActive: user.active,
+      };
+    } else {
+      console.warn(
+        "getSyncAndPromoteStatus: невозможная ситуация, в сессии пользователь есть, а в БД нет",
+      );
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
   }),
   getPersonalCreatedCardsCount: userProcedure
     .input(zod.nullableDate())
