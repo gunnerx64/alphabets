@@ -1,9 +1,14 @@
 import { Badge, BadgeProps } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export function TinyBadge(props: BadgeProps) {
-  const { children, ...otherProps } = props;
+  const { children, className, ...otherProps } = props;
   return (
-    <Badge {...otherProps} variant="secondary" className="px-[2px]">
+    <Badge
+      variant="secondary"
+      className={cn("px-[2px]", className)}
+      {...otherProps}
+    >
       {children}
     </Badge>
   );
