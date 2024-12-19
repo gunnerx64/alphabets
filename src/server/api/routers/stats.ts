@@ -64,7 +64,7 @@ const uncachedGetCreationStats = async (date: Date) => {
       cardsTotal: cardsTotal ?? 0,
     }))
     .filter(({ cardsToday }) => 0 < cardsToday)
-    .sort((a, b) => a.cardsToday - b.cardsToday);
+    .sort((a, b) => b.cardsToday - a.cardsToday);
   return filteredUserStats;
 };
 const getCreationStats = cache(uncachedGetCreationStats);
