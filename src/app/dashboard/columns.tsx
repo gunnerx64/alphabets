@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { PrinterIcon, XSquare } from "lucide-react";
+import { BookOpen, Edit2, Eye, PrinterIcon, View, XSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardWithRefs } from "@/server/db/schema";
 import { addLineBreak } from "@/lib/addLineBreak";
@@ -25,13 +25,13 @@ export const buildCardColumns = (
     cell: (info) => {
       const pagination = info.table.getState().pagination;
       return (
-        <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[42px] grid-cols-1 gap-1">
-            <div className="w-full text-center text-base font-bold">
-              {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
-            </div>
+        // <Link href={`/dashboard/card/${info.row.original.id}`}>
+        <div className="grid min-w-[42px] max-w-[42px] grid-cols-1 gap-1">
+          <div className="w-full text-center text-base font-bold">
+            {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
           </div>
-        </Link>
+        </div>
+        // </Link>
       );
     },
   }),
@@ -60,34 +60,34 @@ export const buildCardColumns = (
         updatedBy && updatedAt ? `${updatedBy} (${updatedAt})` : "";
 
       return (
-        <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[190px] grid-cols-2 gap-1">
-            <div className="text-right">
-              <TinyBadge className="text-right">фио</TinyBadge>
-            </div>
-            <span className="break-words font-bold">{fullName}</span>
-            <div className="text-right">
-              <TinyBadge>д.р.</TinyBadge>
-            </div>
-            <span>{birthdate} г.</span>
-            {token && (
-              <>
-                <div className="text-right">
-                  <TinyBadge>личный номер</TinyBadge>
-                </div>
-                <div>{token}</div>
-              </>
-            )}
-            {isAdmin && updatedByCaption && (
-              <>
-                <div className="text-right">
-                  <TinyBadge variant={"destructive"}>изменил</TinyBadge>
-                </div>
-                <div className="break-words">{updatedByCaption}</div>
-              </>
-            )}
+        //<Link href={`/dashboard/card/${info.row.original.id}`}>
+        <div className="grid min-w-[190px] grid-cols-2 gap-1 md:min-w-[300px] xl:min-w-[340px]">
+          <div className="text-right">
+            <TinyBadge className="text-right">фио</TinyBadge>
           </div>
-        </Link>
+          <span className="break-words font-bold">{fullName}</span>
+          <div className="text-right">
+            <TinyBadge>д.р.</TinyBadge>
+          </div>
+          <span>{birthdate} г.</span>
+          {token && (
+            <>
+              <div className="text-right">
+                <TinyBadge>личный номер</TinyBadge>
+              </div>
+              <div>{token}</div>
+            </>
+          )}
+          {isAdmin && updatedByCaption && (
+            <>
+              <div className="text-right">
+                <TinyBadge variant={"destructive"}>изменил</TinyBadge>
+              </div>
+              <div className="break-words">{updatedByCaption}</div>
+            </>
+          )}
+        </div>
+        //</Link>
       );
     },
     footer: (props) => props.column.id,
@@ -107,51 +107,51 @@ export const buildCardColumns = (
       const exclusionComment = info.row.original.exclusionComment;
 
       return (
-        <Link href={`/dashboard/card/${info.row.original.id}`}>
-          <div className="grid min-w-[230px] grid-cols-2 gap-1">
-            <div className="text-right">
-              <TinyBadge>откуда прибыл</TinyBadge>
-            </div>
-            <div className="break-words">{region}</div>
-            <div className="text-right">
-              <TinyBadge>год поступления</TinyBadge>
-            </div>
-            <div>{admissionYear}</div>
-
-            {graduateYear && (
-              <>
-                <div className="text-right">
-                  <TinyBadge>год выпуска</TinyBadge>
-                </div>
-                <div>{graduateYear}</div>
-              </>
-            )}
-            {graduateYear && exclusionComment && (
-              <>
-                <div className="text-right">
-                  <TinyBadge>комментарий</TinyBadge>
-                </div>
-                <div>{exclusionComment}</div>
-              </>
-            )}
-            {exclusionDate && (
-              <>
-                <div className="text-right">
-                  <TinyBadge>исключён</TinyBadge>
-                </div>
-                <div>{exclusionDate} г.</div>
-              </>
-            )}
-            {exclusionDate && exclusionComment && (
-              <>
-                <div className="text-right">
-                  <TinyBadge>комментарий</TinyBadge>
-                </div>
-                <div>{exclusionComment}</div>
-              </>
-            )}
+        // <Link href={`/dashboard/card/${info.row.original.id}`}>
+        <div className="grid min-w-[230px] grid-cols-2 gap-1 xl:min-w-[360px]">
+          <div className="text-right">
+            <TinyBadge>откуда прибыл</TinyBadge>
           </div>
-        </Link>
+          <div className="break-words">{region}</div>
+          <div className="text-right">
+            <TinyBadge>год поступления</TinyBadge>
+          </div>
+          <div>{admissionYear}</div>
+
+          {graduateYear && (
+            <>
+              <div className="text-right">
+                <TinyBadge>год выпуска</TinyBadge>
+              </div>
+              <div>{graduateYear}</div>
+            </>
+          )}
+          {graduateYear && exclusionComment && (
+            <>
+              <div className="text-right">
+                <TinyBadge>комментарий</TinyBadge>
+              </div>
+              <div>{exclusionComment}</div>
+            </>
+          )}
+          {exclusionDate && (
+            <>
+              <div className="text-right">
+                <TinyBadge>исключён</TinyBadge>
+              </div>
+              <div>{exclusionDate} г.</div>
+            </>
+          )}
+          {exclusionDate && exclusionComment && (
+            <>
+              <div className="text-right">
+                <TinyBadge>комментарий</TinyBadge>
+              </div>
+              <div>{exclusionComment}</div>
+            </>
+          )}
+        </div>
+        // </Link>
       );
     },
     footer: (props) => props.column.id,
@@ -187,7 +187,25 @@ export const buildCardColumns = (
       });
 
       return (
-        <div className="flex flex-col items-center justify-center gap-1 xl:flex-row">
+        <div className="flex flex-col items-center justify-center gap-1 xl:min-w-[160px] xl:flex-row">
+          {/* Ссылка на карточку */}
+          {
+            <Link
+              href={`/dashboard/card/${props.row.original.id}`}
+              target="_blank"
+            >
+              <TooltipBase title="Открыть карточку">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  disabled={isGuest}
+                  aria-label={`Открыть карточку ${lastname}`}
+                >
+                  <Eye size={20} />
+                </Button>
+              </TooltipBase>
+            </Link>
+          }
           {/* Печать*/}
           {
             <TooltipBase title="Распечатать карточку">

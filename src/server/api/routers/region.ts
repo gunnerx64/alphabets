@@ -37,8 +37,8 @@ export const regionRouter = createTRPCRouter({
       return await getRegionsOptions();
     }),
 
-  getRegions: adminProcedure.query(async () => {
-    return await db.query.regions.findMany();
+  getAllRegions: adminProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.regions.findMany();
   }),
 
   upsertRegion: adminProcedure

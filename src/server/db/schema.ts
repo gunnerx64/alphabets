@@ -78,6 +78,10 @@ export const cardRelations = relations(cards, ({ one }) => ({
 }));
 
 export type User = typeof users.$inferSelect;
+export type UserWithRefs = Omit<User, "emailVerified"> & {
+  totalCards?: number;
+};
+
 // export type UserInsert = typeof users.$inferInsert;
 
 export type RegionInsert = typeof regions.$inferInsert;

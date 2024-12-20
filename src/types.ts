@@ -4,6 +4,12 @@ export const Roles = ["guest", "user", "admin"] as const;
 /** User roles */
 export type Role = (typeof Roles)[number];
 
+/** Список уровней логов */
+export const LogLevels = ["normal", "search", "critical"] as const;
+
+/** Уровни логов */
+export type LogLevel = (typeof LogLevels)[number];
+
 export type GenericResponse<T = never> = {
   success: boolean;
   message?: string;

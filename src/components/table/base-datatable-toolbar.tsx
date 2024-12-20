@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Table } from "@tanstack/react-table";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { CircleUser, CircleUserRound } from "lucide-react";
@@ -10,6 +10,22 @@ import { OptionItem } from "@/types";
 import { BaseDataTableFacetedFilter } from "./base-datatable-faceted-filter";
 import { BaseDataTableViewOptions } from "./base-datatable-view-options";
 
+const convertMapToOptions = (uniqueValues?: Map<any, number>): OptionItem[] => {
+  const result: OptionItem[] = [];
+  if (uniqueValues)
+    for (const val of uniqueValues.keys()) result.push({ id: val, title: val });
+  return result;
+};
+
+const convertArrayToOptions = (
+  uniqueValues?: string[] | undefined,
+): OptionItem[] => {
+  const result: OptionItem[] = [];
+  if (uniqueValues)
+    for (const val of uniqueValues) result.push({ id: val, title: val });
+  return result;
+};
+
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
@@ -18,25 +34,6 @@ export function BaseDataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-
-  const convertMapToOptions = (
-    uniqueValues?: Map<any, number>,
-  ): OptionItem[] => {
-    const result: OptionItem[] = [];
-    if (uniqueValues)
-      for (const val of uniqueValues.keys())
-        result.push({ id: val, title: val });
-    return result;
-  };
-
-  const convertArrayToOptions = (
-    uniqueValues?: string[] | undefined,
-  ): OptionItem[] => {
-    const result: OptionItem[] = [];
-    if (uniqueValues)
-      for (const val of uniqueValues) result.push({ id: val, title: val });
-    return result;
-  };
 
   /** Builds a unique set of column values,
    * then converts set to OptionItem array for shiny Dropdown
@@ -58,10 +55,17 @@ export function BaseDataTableToolbar<TData>({
     return buildUniqueColumnOptions("республика");
   }, [table]);
 
+  const hasColumn = useCallback(
+    (columnId: string) => {
+      return !!table.getAllColumns().find(({ id }) => id === columnId);
+    },
+    [table],
+  );
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
-        {table.getColumn("название региона") && (
+        {hasColumn("название региона") && (
           <Input
             placeholder="Фильтр по региону..."
             value={
@@ -77,11 +81,22 @@ export function BaseDataTableToolbar<TData>({
             className="h-8 w-[150px] lg:w-[250px]"
           />
         )}
-        {table.getColumn("республика") && (
+        {hasColumn("республика") && (
           <BaseDataTableFacetedFilter
             column={table.getColumn("республика")}
             title="Республика"
             options={uniqueStateValues}
+          />
+        )}
+
+        {hasColumn("ФИО") && (
+          <Input
+            placeholder="Фильтр по фамилии.."
+            value={(table.getColumn("ФИО")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("ФИО")?.setFilterValue(event.target.value)
+            }
+            className="h-8 w-[150px] lg:w-[250px]"
           />
         )}
 
@@ -97,16 +112,7 @@ export function BaseDataTableToolbar<TData>({
             className="h-8 w-[150px] lg:w-[250px]"
           />
         )}
-        {table.getColumn("ФИО") && (
-          <Input
-            placeholder="Фильтр по фамилии.."
-            value={(table.getColumn("ФИО")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("ФИО")?.setFilterValue(event.target.value)
-            }
-            className="h-8 w-[150px] lg:w-[250px]"
-          />
-        )}
+        
         {table.getColumn("специальность") && (
           <Input
             placeholder="Фильтр по специальности.."

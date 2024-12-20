@@ -65,7 +65,7 @@ const defaultColumns: ColumnDef<RegionSelect, any>[] = [
                 title: "Успешная операция",
                 description: `Регион ${props.row.original.title} удалён.`,
               });
-              utils.region.getRegions.invalidate();
+              utils.region.getAllRegions.invalidate();
             } else {
               toast({
                 variant: "destructive",
@@ -118,7 +118,7 @@ export function RegionsTable() {
     data: regions,
     isPending: isLoading,
     error,
-  } = api.region.getRegions.useQuery();
+  } = api.region.getAllRegions.useQuery();
 
   return (
     <div className="mt-2 flex flex-col items-center justify-start gap-2">

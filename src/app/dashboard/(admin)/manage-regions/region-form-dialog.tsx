@@ -54,7 +54,7 @@ export function RegionFormDialog({
     api.region.upsertRegion.useMutation({
       onSettled: (res, error) => {
         if (res?.success) {
-          utils.region.getRegions.invalidate();
+          utils.region.getAllRegions.invalidate();
           form.reset();
           setOpen(false);
         } else {

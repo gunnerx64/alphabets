@@ -1,6 +1,7 @@
 import "server-only";
 import { and, count, eq, gte, lt } from "drizzle-orm";
 import {
+  adminProcedure,
   createTRPCRouter,
   publicProcedure,
   userProcedure,
@@ -13,6 +14,7 @@ import { cache } from "react";
 import { z } from "zod";
 import { zod } from "@/lib/zod-helpers";
 import { addDays, startOfDay, startOfToday, startOfTomorrow } from "date-fns";
+import { GenericResponseValidator } from "@/lib/validators";
 
 const uncachedGetUser = async (id: string) => {
   console.log("GetUser called");
@@ -65,10 +67,73 @@ export const userRouter = createTRPCRouter({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
   }),
+
   getPersonalCreatedCardsCount: userProcedure
     .input(zod.nullableDate())
     .query(async ({ ctx, input: date }) => {
       const { session } = ctx;
       return await getUserCreatedCardsCount(session.user.id, date);
+    }),
+
+  getAllUsers: adminProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users.findMany({
+      columns: {
+        emailVerified: false,
+      },
+    });
+  }),
+
+  toggleActive: adminProcedure
+    .input(z.string().uuid())
+    .output(GenericResponseValidator)
+    .mutation(async ({ ctx, input: id }) => {
+      try {
+        const user = await ctx.db.query.users.findFirst({
+          where: eq(users.id, id),
+        });
+        if (!user) return { success: false, message: "Пользователь не найден" };
+        await ctx.db
+          .update(users)
+          .set({ active: !user.active })
+          .where(eq(users.id, id));
+        // TODO: log critical action if success
+        return { success: true };
+      } catch (e: unknown) {
+        let message = "Непредвиденная ошибка сервера 🙃";
+        console.warn(
+          `toggleActive: непредвиденная ошибка: ${(e as any)?.message}`,
+        );
+        return { success: false, message };
+      }
+    }),
+
+  deleteUser: adminProcedure
+    .input(z.string().uuid())
+    .output(GenericResponseValidator)
+    .mutation(async ({ ctx, input: id }) => {
+      try {
+        const deletedUser = await ctx.db
+          .delete(users)
+          .where(eq(users.id, id))
+          .returning({ id: users.id, name: users.name });
+        if (0 < deletedUser.length) {
+          console.log(
+            `deleteUser: пользователь ${ctx.session.user.name} удалил пользователя ${deletedUser.at(0)?.name}`,
+          );
+          // TODO: log critical action if success
+          return { success: true };
+        } else return { success: false, message: "Пользователь не найден" };
+      } catch (e: unknown) {
+        let message = "Непредвиденная ошибка сервера 🙃";
+        if (e instanceof Error) {
+          if (e.message.includes("foreign"))
+            message =
+              "Пользователь оцифровал минимум одну алфавитку. Удаление невозможно.";
+          else {
+            console.warn(`deleteUser: непредвиденная ошибка: ${e.message}`);
+          }
+        }
+        return { success: false, message };
+      }
     }),
 });
