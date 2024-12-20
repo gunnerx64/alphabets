@@ -80,7 +80,9 @@ export const cardRelations = relations(cards, ({ one }) => ({
 export type User = typeof users.$inferSelect;
 // export type UserInsert = typeof users.$inferInsert;
 
-export type Region = Omit<typeof regions.$inferSelect, "sort">;
+export type RegionInsert = typeof regions.$inferInsert;
+export type RegionSelect = typeof regions.$inferSelect;
+export type Region = Omit<RegionSelect, "sort">;
 
 export type Card = typeof cards.$inferSelect; //& { createdBy: User };
 export type CardInsert = typeof cards.$inferInsert;

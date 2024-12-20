@@ -1,11 +1,27 @@
-import { CardInsert } from "@/server/db/schema";
+import { CardInsert, RegionInsert } from "@/server/db/schema";
 import { z } from "zod";
 import { MaxAllowedBirthYear, MinAllowedBirthYear } from "@/config";
 import { zod } from "./zod-helpers";
+import { GenericResponse } from "@/types";
 
 export type InferZodMap<T extends abstract new (...args: any) => any> = {
   [k in keyof Partial<InstanceType<T>>]?: unknown;
 };
+
+export const GenericResponseValidator: z.ZodType<GenericResponse> = z.object({
+  success: z.boolean(),
+  message: z.string().min(1).optional(),
+  payload: z.any().optional(),
+});
+
+export const RegionUpsertValidator: z.ZodType<RegionInsert> = z.object({
+  id: z.string().uuid().optional(),
+  title: zod.string("Укажите название региона"),
+  state: zod.optionalNullableString(),
+  sort: z.coerce
+    .number({ invalid_type_error: "Укажите целое число" })
+    .optional(),
+});
 
 export const CardsQueryValidator = z.object({
   page: z.number().min(1).optional().default(1),
